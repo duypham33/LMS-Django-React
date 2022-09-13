@@ -1,0 +1,39 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>New Session</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Session Start</label>
+                        <input type="date" class="form-control" name="start_date" placeholder="Start date">
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Session End</label>
+                        <input type="date" class="form-control" name="end_date" placeholder="End date">
+                    </div>
+                </div>
+                
+
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+
+{% endblock %}

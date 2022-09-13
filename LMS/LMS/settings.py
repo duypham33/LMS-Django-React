@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "app.apps.AppConfig",
+    "teacher.apps.TeacherConfig",
+    "student.apps.StudentConfig",
+    "staff.apps.StaffConfig",
 ]
 
 MIDDLEWARE = [
@@ -95,6 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
+AUTH_USER_MODEL = 'app.User'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

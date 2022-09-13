@@ -17,6 +17,23 @@
          {% include 'includes/header.html' %}
          
          {% include 'includes/sidebar.html' %}
+         
+         
+         <div class="page-wrapper">
+            {% if messages %}
+               {% for msg in messages %}
+                     <div class="alert alert-{{msg.tags}} alert-dismissible fade show" role="alert">
+                        {{msg}}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                           <span aria-hidden="true">&times;</span>
+                        </button>
+                     </div>
+               {% endfor %}
+            {% endif %}
+            <div class="content container-fluid">
+               {% block content %} {% endblock %}
+            </div>
+         </div>
       </div>
 
 

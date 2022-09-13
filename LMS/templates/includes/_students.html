@@ -1,0 +1,48 @@
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card card-table">
+          <div class="card-body">
+             <div class="table-responsive">
+                <table class="table table-hover table-center mb-0 datatable">
+                   <thead>
+                      <tr>
+                         <th>ID</th>
+                         <th>Name</th>
+                         <th>Email</th>
+                         <th>Gender</th>
+                         <th>Course(s)</th>
+                         <th class="text-right">Action</th>
+                      </tr>
+                   </thead>
+                   <tbody>
+                     {% for s in students %}
+                      <tr>
+                         <td>{{s.student_id}}</td>
+                         <td>
+                            <h2 class="table-avatar">
+                               <a href="{% url 'teacher:update_student' pk=s.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{s.user.avatar}}" alt="User Image"></a>
+                               <a href="{% url 'teacher:update_student' pk=s.pk %}">{{s.user.first_name}} {{s.user.last_name}}</a>
+                            </h2>
+                         </td>
+                         <td>{{s.user.email}}</td>
+                         <td>{{s.gender}}</td>
+                         <td><a href="#">View Course List</a></td>
+                         <td class="text-right">
+                            <div class="actions">
+                               <a href="{% url 'teacher:update_student' pk=s.pk %}" class="btn btn-sm bg-success-light mr-2">
+                               <i class="fas fa-pen"></i>
+                               </a>
+                               <a href="{% url 'teacher:delete_student' pk=s.pk %}" class="btn btn-sm bg-danger-light">
+                               <i class="fas fa-trash"></i>
+                               </a>
+                            </div>
+                         </td>
+                      </tr>
+                      {% endfor %}
+                   </tbody>
+                </table>
+             </div>
+          </div>
+       </div>
+    </div>
+ </div>

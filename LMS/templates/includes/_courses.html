@@ -1,0 +1,48 @@
+
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card card-table">
+          <div class="card-body">
+             <div class="table-responsive">
+                <table class="table table-hover table-center mb-0 datatable">
+                   <thead>
+                      <tr>
+                         <th>Subject</th>
+                         <th>Title</th>
+                         <th>Created Date</th>
+                         <th>Session</th>
+                         <th>Staffs</th>
+                         <th>Roster</th>
+                         <th class="text-right">Action</th>
+                      </tr>
+                   </thead>
+                   <tbody>
+                     {% for c in courses %}
+                      <tr>
+                         <td>{{c}}</td>
+                         <td> 
+                            <a href="{% url 'teacher:update_course' pk=c.pk %}">{{c.title}}</a>                           
+                         </td>
+                         <td>{{c.date_created}}</td>
+                         <td>{{c.session}}</td>
+                         <td><a href="#">View Staff List</a></td>
+                         <td><a href="#">View Roster</a></td>
+                         <td class="text-right">
+                            <div class="actions">
+                               <a href="{% url 'teacher:update_course' pk=c.pk %}" class="btn btn-sm bg-success-light mr-2">
+                               <i class="fas fa-pen"></i>
+                               </a>
+                               <a href="{% url 'teacher:delete_course' pk=c.pk %}" class="btn btn-sm bg-danger-light">
+                               <i class="fas fa-trash"></i>
+                               </a>
+                            </div>
+                         </td>
+                      </tr>
+                      {% endfor %}
+                   </tbody>
+                </table>
+             </div>
+          </div>
+       </div>
+    </div>
+ </div>
