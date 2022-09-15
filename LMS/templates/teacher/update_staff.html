@@ -1,0 +1,67 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>Staff Info</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>ID</label>
+                        <input type="text" class="form-control" name="id" value="{{staff.staff_id}}">
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" class="form-control" name="first_name" value="{{staff.user.first_name}}">
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" name="last_name" value="{{staff.user.last_name}}">
+                    </div>
+                </div>
+                
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>UserName</label>
+                        <input type="text" class="form-control" name="username" value="{{staff.user.username}}">
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" name="email" value="{{staff.user.email}}" readonly>
+                    </div>
+                </div>
+        
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Course(s) - Choose multiple options by 'alt' key</label>
+                        <select multiple class="form-control" name="courses">
+                            {% for c in courses %}
+                                <option value="{{c.id}}" {% if c in staff.courses.all %} selected {% endif %}
+                                >{{c}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

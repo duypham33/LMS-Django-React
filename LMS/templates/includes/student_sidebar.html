@@ -1,0 +1,65 @@
+
+<li class="menu-title">
+    <span>Main Menu</span>
+ </li>
+ <li class="submenu active">
+    <a href="#"><i class="fas fa-user-graduate"></i> <span> Dashboard</span> <span class="menu-arrow"></span></a>
+    <ul>
+       <li><a href="index.html" class="active">Admin Dashboard</a></li>
+       <li><a href="teacher-dashboard.html">Teacher Dashboard</a></li>
+       <li><a href="student-dashboard.html">Student Dashboard</a></li>
+    </ul>
+ </li>
+ <li class="submenu">
+    <a href="#"><i class="fas fa-user-graduate"></i> <span> Students</span> <span class="menu-arrow"></span></a>
+    <ul>
+       <li><a href="{% url 'teacher:view_students' %}">View Students</a></li>
+       <li><a href="{% url 'teacher:add_student' %}">Add Student</a></li>
+       <li><a href="{% url 'teacher:edit_student' %}">Edit Student</a></li>
+    </ul>
+ </li>
+ <li class="submenu">
+    <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Staff</span> <span class="menu-arrow"></span></a>
+    <ul>
+       <li><a href="{% url 'teacher:view_staffs' %}"> View Staff</a></li>
+       <li><a href="{% url 'teacher:add_staff' %}">Add Staff</a></li>
+       <li><a href="{% url 'teacher:edit_staff' %}">Edit Staff</a></li>
+    </ul>
+ </li>
+ <li class="submenu">
+    <a href="#"><i class="fa fa-graduation-cap"></i> <span> Courses</span> <span class="menu-arrow"></span></a>
+    <ul>
+       <li><a href="{% url 'teacher:view_courses' %}">Courses List</a></li>
+       <li><a href="{% url 'teacher:add_course' %}">Add Course</a></li>
+       <li><a href="{% url 'teacher:edit_course' %}"> Edit Course </a></li>
+    </ul>
+ </li>
+ <li class="submenu">
+    <a href="#"><i class="fas fa-book-reader"></i> <span> Subjects</span> <span class="menu-arrow"></span></a>
+    <ul>
+       <li><a href="{% url 'teacher:view_subjects' %}">Subject List</a></li>
+       <li><a href="{% url 'teacher:add_subject' %}"> Add Subject </a></li>
+    </ul>
+ </li>
+ <li>
+   <a href="#"><i class="fa fa-clock"></i> <span> Sessions</span> <span class="menu-arrow"></span></a>
+   <ul>
+      <li><a href="{% url 'teacher:view_sessions' %}">Session List</a></li>
+      <li><a href="{% url 'teacher:add_session' %}"> Add Session </a></li>
+   </ul>
+ </li>
+ <li>
+   <a href="#"><i class="fa fa-calendar"></i> <span> View Attendance</span> </a>
+ </li>
+ <li>
+   <a href="#"><i class="fas fa-comments"></i> <span> Staff Feedback</span> </a>
+ </li>
+ <li>
+   <a href="#"><i class="fas fa-comments"></i> <span> Student Feedback </span> </a>
+ </li>
+ <li>
+   <a href="#"><i class="fas fa-envelope"></i> <span> Staff Leave</span></a>
+ </li>
+ <li>
+   <a href="#"><i class="fas fa-envelope"></i> <span> Student Leave</span> </a>
+ </li>

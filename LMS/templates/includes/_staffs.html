@@ -9,31 +9,29 @@
                          <th>ID</th>
                          <th>Name</th>
                          <th>Email</th>
-                         <th>Gender</th>
                          <th>Course(s)</th>
                          <th class="text-right">Action</th>
                       </tr>
                    </thead>
                    <tbody>
-                     {% for s in students %}
+                     {% for s in staffs %}
                       <tr>
-                         <td>{{s.student_id}}</td>
+                         <td>{{s.staff_id}}</td>
                          <td>
                             <h2 class="table-avatar">
-                               <a href="{% url 'teacher:update_student' pk=s.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{s.user.avatar}}" alt="User Image"></a>
-                               <a href="{% url 'teacher:update_student' pk=s.pk %}">{{s.user.first_name}} {{s.user.last_name}}</a>
+                               <a href="{% url 'teacher:update_staff' pk=s.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{s.user.avatar}}" alt="User Image"></a>
+                               <a href="{% url 'teacher:update_staff' pk=s.pk %}">{{s.user.first_name}} {{s.user.last_name}}</a>
                             </h2>
                          </td>
                          <td>{{s.user.email}}</td>
-                         <td>{{s.gender}}</td>
-                         <td><a href="{% url 'teacher:coursesOfStud' pk=s.pk %}">View Course List</a></td>
+                         <td><a href="{% url 'teacher:coursesOfStaff' pk=s.pk %}">View Course List</a></td>
                          <td class="text-right">
                             <div class="actions">
-                               <a href="{% url 'teacher:update_student' pk=s.pk %}" class="btn btn-sm bg-success-light mr-2">
+                               <a href="{% url 'teacher:update_staff' pk=s.pk %}" class="btn btn-sm bg-success-light mr-2">
                                <i class="fas fa-pen"></i>
                                </a>
                                {% if not title %}
-                                 <a href="{% url 'teacher:delete_student' pk=s.pk %}" class="btn btn-sm bg-danger-light">
+                                 <a href="{% url 'teacher:delete_staff' pk=s.pk %}" class="btn btn-sm bg-danger-light">
                                  <i class="fas fa-trash"></i>
                                  </a>
                                {% endif %}

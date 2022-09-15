@@ -19,8 +19,8 @@
                   <i class="fas fa-user-graduate"></i>
                </div>
                <div class="db-info">
-                  <h3>50055</h3>
-                  <h6>Students</h6>
+                  <h3>{{num_courses}}</h3>
+                  <h6>Courses</h6>
                </div>
             </div>
          </div>
@@ -34,8 +34,8 @@
                   <i class="fas fa-crown"></i>
                </div>
                <div class="db-info">
-                  <h3>50+</h3>
-                  <h6>Awards</h6>
+                  <h3>{{num_students}}</h3>
+                  <h6>Students</h6>
                </div>
             </div>
          </div>
@@ -49,8 +49,14 @@
                   <i class="fas fa-building"></i>
                </div>
                <div class="db-info">
-                  <h3>30+</h3>
-                  <h6>Department</h6>
+                  {% if user.user_type == '1' %} 
+                     <h3>{{num_staffs}}</h3>
+                     <h6>Staffs</h6>
+                  {% elif user.user_type == '2' %}
+                     <h3>{{num_hosts}}</h3>
+                     <h6>Professors</h6>
+                  
+                  {% endif %}
                </div>
             </div>
          </div>

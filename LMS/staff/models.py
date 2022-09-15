@@ -16,3 +16,28 @@ class Staff(models.Model):
     def __str__(self):
         return self.user.__str__()
     
+    def is_enrolled(self, theCourse):
+        try:
+            self.courses.get(id = theCourse.id)
+            return True
+        except:
+            return False
+    
+    def enroll(self, theCourse):
+        if not self.is_enrolled(theCourse):
+            self.courses.add(theCourse)
+
+    def un_enroll(self, theCourse):
+        if self.is_enrolled(theCourse):
+            self.courses.remove(theCourse)
+
+    def enroll_course_list(self, course_list):
+        for course in course_list:
+            self.courses.add(course) #No need to check is_enrolled, since it is used at the 1st enroll
+
+    def is_my_student(self, theStudent):
+        try:
+            self.students.get(pk = theStudent.pk)
+            return True
+        except:
+            return False

@@ -34,3 +34,10 @@ class Student(models.Model):
     def enroll_course_list(self, course_list):
         for course in course_list:
             self.courses.add(course) #No need to check is_enrolled, since it is used at the 1st enroll
+
+    def is_my_staff(self, theStaff):
+        try:
+            self.staffs.get(pk = theStaff.pk)
+            return True
+        except:
+            return False

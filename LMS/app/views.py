@@ -8,7 +8,12 @@ import os
 
 @login_required(login_url='login/')
 def index(request):
-    return render(request, 'index.html')
+    if request.user.user_type == '1':
+        return redirect('teacher:teaHome')
+    elif request.user.user_type == '2':
+        return redirect('staff:staHome')
+    else:
+        return redirect('student:stuHome')
 
 
 

@@ -4,78 +4,18 @@
     <div class="sidebar-inner slimscroll">
        <div id="sidebar-menu" class="sidebar-menu">
           <ul>
-             <li class="menu-title">
-                <span>Main Menu</span>
-             </li>
-             <li class="submenu active">
-                <a href="#"><i class="fas fa-user-graduate"></i> <span> Dashboard</span> <span class="menu-arrow"></span></a>
-                <ul>
-                   <li><a href="index.html" class="active">Admin Dashboard</a></li>
-                   <li><a href="teacher-dashboard.html">Teacher Dashboard</a></li>
-                   <li><a href="student-dashboard.html">Student Dashboard</a></li>
-                </ul>
-             </li>
-             <li class="submenu">
-                <a href="#"><i class="fas fa-user-graduate"></i> <span> Students</span> <span class="menu-arrow"></span></a>
-                <ul>
-                   <li><a href="{% url 'teacher:view_students' %}">View Students</a></li>
-                   <li><a href="{% url 'teacher:add_student' %}">Add Student</a></li>
-                   <li><a href="{% url 'teacher:edit_student' %}">Edit Student</a></li>
-                </ul>
-             </li>
-             <li class="submenu">
-                <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Staff</span> <span class="menu-arrow"></span></a>
-                <ul>
-                   <li><a href="teachers.html">Staff List</a></li>
-                   <li><a href="teacher-details.html"> View Staff</a></li>
-                   <li><a href="add-teacher.html">Add Staff</a></li>
-                   <li><a href="edit-teacher.html">Edit Staff</a></li>
-                </ul>
-             </li>
-             <li class="submenu">
-                <a href="#"><i class="fa fa-graduation-cap"></i> <span> Courses</span> <span class="menu-arrow"></span></a>
-                <ul>
-                   <li><a href="{% url 'teacher:view_courses' %}">Courses List</a></li>
-                   <li><a href="{% url 'teacher:add_course' %}">Add Course</a></li>
-                   <li><a href="{% url 'teacher:edit_course' %}"> Edit Course </a></li>
-                </ul>
-             </li>
-             <li class="submenu">
-                <a href="#"><i class="fas fa-book-reader"></i> <span> Subjects</span> <span class="menu-arrow"></span></a>
-                <ul>
-                   <li><a href="subjects.html">Subject List</a></li>
-                   <li><a href="{% url 'teacher:add_subject' %}"> Add Subject </a></li>
-                   <li><a href="edit-subject.html"> Edit Subject </a></li>
-                </ul>
-             </li>
-             <li>
-               <a href="#"><i class="fa fa-clock"></i> <span> Sessions</span> <span class="menu-arrow"></span></a>
-               <ul>
-                  <li><a href="subjects.html">Session List</a></li>
-                  <li><a href="{% url 'teacher:add_session' %}"> Add Session </a></li>
-                  <li><a href="edit-subject.html"> Edit Session </a></li>
-               </ul>
-             </li>
-             <li>
-               <a href="#"><i class="fa fa-calendar"></i> <span> View Attendance</span> </a>
-             </li>
-             <li>
-               <a href="#"><i class="fas fa-comments"></i> <span> Staff Feedback</span> </a>
-             </li>
-             <li>
-               <a href="#"><i class="fas fa-comments"></i> <span> Student Feedback </span> </a>
-             </li>
-             <li>
-               <a href="#"><i class="fas fa-envelope"></i> <span> Staff Leave</span></a>
-             </li>
-             <li>
-               <a href="#"><i class="fas fa-envelope"></i> <span> Student Leave</span> </a>
-             </li>
+            {% if user.user_type == '1' %} 
+               {% include 'includes/teacher_sidebar.html' %}
+            {% elif user.user_type == '2' %}
+               {% include 'includes/staff_sidebar.html' %}
+            {% else %}
+               {% include 'includes/student_sidebar.html' %}
+            {% endif %}
+
+
              <li>
                <a href="{% url 'app:logout' %}"><i class="fas fa-sign-out-alt"></i> <span> Logout </span> </a>
              </li>
-
-
 
              <li class="menu-title">
                 <span>Management</span>

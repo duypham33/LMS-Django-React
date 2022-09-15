@@ -4,11 +4,18 @@ from django.contrib.auth.decorators import login_required
 from app.models import User, Session_Year, Subject, Course
 from django.contrib import messages
 from student.models import Student
+from staff.models import Staff
 # Create your views here.
 
 @login_required(login_url='login/')
 def home(request):
-    return render(request, 'teacher/home.html')
+    num_students = request.user.teacher.students.count()
+    num_staffs = request.user.teacher.staffs.count()
+    num_courses = request.user.teacher.courses.count()
+    context = {'num_students': num_students, 
+               'num_staffs': num_staffs, 'num_courses': num_courses}
+
+    return render(request, 'teacher/home.html', context = context)
 
 
 @login_required(login_url='login/')
@@ -157,7 +164,7 @@ def edit_a_student(request, pk):
             student.user.last_name = last_name
             student.gender = gender
             student.user.username = username
-            request.user.teacher.edit_stud_courses(student, course_list)
+            request.user.teacher.edit_course_list(student, course_list)
             student.save()
             student.user.save()
 
@@ -215,6 +222,7 @@ def update_course(request, pk):
             course.title = title
             course.session_id = session_id
             # Do staff
+            request.user.teacher.edit_staffsOf_course(course, staff_list)
             course.save()
             messages.success(request, 'The course is updated!')
 
@@ -234,3 +242,201 @@ def delete_course(request, pk):
 
 
 
+
+@login_required(login_url='login/')
+def add_staff(request):
+    courses = request.user.teacher.courses.all()
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        course_list = request.POST.getlist('courses')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        try:
+            u = User.objects.get(email = email)
+            messages.warning(request, 
+            f'The account with email \'{email}\' already exists! Please, try to create a new one!')
+        except:
+            if password == confirm_password:
+                u = User.objects.create(first_name=first_name, last_name=last_name,username=username,
+                email=email, password=password, user_type='2')
+
+                staff = u.staff
+                request.user.teacher.staffs.add(staff)
+                if course_list != []:
+                    staff.enroll_course_list(course_list)
+                staff.save()
+
+                messages.success(request, 
+                f'The staff account is created with ID: {staff.staff_id}')
+        
+        if password != confirm_password:
+            messages.warning(request, f'Confirm password doesn\'t match!')
+
+    return render(request, 'teacher/add_staff.html', {'courses': courses})
+
+
+@login_required(login_url='login/')
+def view_staffs(request):
+    staffs = request.user.teacher.staffs.all()
+
+    return render(request, 'teacher/view_staffs.html', {'staffs': staffs})
+
+@login_required(login_url='login/')
+def edit_staff(request):
+    staffs = request.user.teacher.staffs.all()
+
+    return render(request, 'teacher/edit_staff.html', {'staffs': staffs})
+
+
+
+@login_required(login_url='login/')
+def edit_a_staff(request, pk):
+    staff = Staff.objects.get(pk = pk)
+    courses = request.user.teacher.courses.all()
+
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        courseID_list = request.POST.getlist('courses')
+        
+        if not id or len(id) != 9:
+            messages.warning(request, 'ID should have 9 digits!')
+        elif not first_name or first_name == '' or not last_name or last_name == '' or not username or username == '':
+            messages.warning(request, 'First name, last name, and username must not be empty!')
+        else:
+            staff.staff_id = id
+            staff.user.first_name = first_name
+            staff.user.last_name = last_name
+            staff.user.username = username
+            request.user.teacher.edit_course_list(staff, courseID_list)
+            staff.save()
+            staff.user.save()
+
+            messages.success(request, 'Staff Info is updated!')
+        return redirect('teacher:update_staff', pk = staff.pk)
+
+    return render(request, 'teacher/update_staff.html', {'staff': staff, 'courses': courses})
+
+
+
+
+@login_required(login_url='login/')
+def delete_staff(request, pk):
+    staff = Staff.objects.get(pk = pk)
+    name = staff.user.first_name + ' ' + staff.user.last_name
+    request.user.teacher.staffs.remove(staff)  #Signal will deal with the remainning stuff
+
+    messages.success(request, f'You removed staff {name} out of your courses and staff list!')
+    return redirect('teacher:view_staffs')
+
+
+
+
+
+
+@login_required(login_url='login/')
+def view_coursesOf_student(request, pk):
+    stu = Student.objects.get(pk = pk)
+    courses = stu.courses.filter(instructor = request.user.teacher)
+    name = stu.user.first_name + ' ' + stu.user.last_name
+    context = {'name': name, 'courses': courses}
+
+    return render(request, 'teacher/view_courses.html', context=context)
+
+
+@login_required(login_url='login/')
+def view_coursesOf_staff(request, pk):
+    staff = Staff.objects.get(pk = pk)
+    courses = staff.courses.filter(instructor = request.user.teacher)
+    name = staff.user.first_name + ' ' + staff.user.last_name
+    context = {'name': name, 'courses': courses, 'user_type': '2'}
+
+    return render(request, 'teacher/view_courses.html', context=context)
+
+
+@login_required(login_url='login/')
+def view_roster(request, pk):
+    c = Course.objects.get(pk = pk)
+    students = c.students.all()
+    title = c.__str__() + ' - ' + c.title
+    context = {'title': title, 'students': students}
+
+    return render(request, 'teacher/view_students.html', context=context)
+
+
+
+@login_required(login_url='login/')
+def view_staffOf_course(request, pk):
+    c = Course.objects.get(pk = pk)
+    staffs = c.staffs.all()
+    title = c.__str__() + ' - ' + c.title
+    context = {'title': title, 'staffs': staffs}
+
+    return render(request, 'teacher/view_staffs.html', context=context)
+
+
+
+
+@login_required(login_url='login/')
+def view_subjects(request):
+    subjects = Subject.objects.all()
+    return render(request, 'teacher/view_subjects.html', {'subjects': subjects})
+
+@login_required(login_url='login/')
+def update_subject(request, pk):
+    subject = Subject.objects.get(pk = pk)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name and name != '':
+            try:
+                s = Subject.objects.get(name = name)
+                if name != subject.name:
+                    messages.warning(request, f'This subject \'{name}\' already exists!')
+                else:
+                    messages.success(request, 'The subject name is kept as before! Thank you!')
+                return redirect('teacher:update_subject', pk = subject.pk)
+            except:
+                subject.name = name
+                subject.save()
+                messages.success(request, 'The subject is updated!')
+        else:
+            messages.warning(request, 'Need to fille Subject Name!')
+
+    return render(request, 'teacher/update_subject.html', {'subject': subject})
+
+
+@login_required(login_url='login/')
+def view_sessions(request):
+    sessions = Session_Year.objects.all()
+    return render(request, 'teacher/view_sessions.html', {'sessions': sessions})
+
+
+@login_required(login_url='login/')
+def update_session(request, pk):
+    session = Session_Year.objects.get(pk = pk)
+    if request.method == 'POST':
+        start_date = request.POST.get('start_date', None)
+        end_date = request.POST.get('end_date', None)
+        if start_date and end_date and start_date != '' and end_date != '':
+            # start_date = datetime.datetime.strptime(start_date, '%y-%m-%d').strftime('%Y-%m-%d')
+            # end_date = datetime.datetime.strptime(end_date, '%y-%m-%d').strftime('%Y-%m-%d')
+            if Session_Year.objects.filter(start_date=start_date).filter(end_date=end_date).exists() == False:
+                session.start_date = start_date
+                session.end_date = end_date
+                session.save()
+                messages.success(request, f'The session is updated!')
+            elif start_date != session.start_date or end_date != session.end_date:
+                 messages.warning(request, f'This session already exists!')
+            else:
+                messages.success(request, f'The session is kept as before!')
+        else:
+            messages.warning(request, 'Missing date!')
+
+    return render(request, 'teacher/update_session.html', {'session': session})
