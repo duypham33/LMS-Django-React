@@ -3,28 +3,28 @@
     <span>Main Menu</span>
  </li>
  <li class="submenu active">
-    <a href="{% url 'staff:staHome' %}"><i class="fas fa-user-graduate"></i> <span> Dashboard</span> <span class="menu-arrow"></span></a>
+    <a href="{% url 'staff:staHome' %}"><i class="fas fa-user-graduate"></i> <span> Dashboard</span> </a>
  </li>
  <li>
-    <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Professors </span> </a>
+    <a href="{% url 'staff:view_professors' %}"><i class="fas fa-chalkboard-teacher"></i> <span> Professors </span> </a>
  </li>
  <li>
-    <a href="#"><i class="fas fa-user-graduate"></i> <span> Students </span> </a>
- </li>
- <li>
-    <a href="#"><i class="fa fa-graduation-cap"></i> <span> Courses </span></a>
+    <a href="{% url 'staff:view_courses' %}"><i class="fa fa-graduation-cap"></i> <span> Courses </span></a>
  </li>
 
  <li class="submenu">
     <a href="#"><i class="fa fa-calendar"></i> <span> Attendance</span> <span class="menu-arrow"></span> </a>    
     <ul>
-       <li><a href="{% url 'teacher:view_subjects' %}">Take Attendance</a></li>
-       <li><a href="{% url 'teacher:add_subject' %}"> Update Attendance </a></li>
+       <li><a href="#">Take Attendance</a></li>
+       <li><a href="#"> Update Attendance </a></li>
     </ul>
  </li>
 
  <li>
    <a href="#"><i class="fa fa-poll-h"></i> <span>Add Result </span> </a>
+ </li>
+ <li>
+   <a href="{% url 'app:select_course_send_notice' %}"><i class="fas fa-bell"></i> <span> Send Notification </span> </a>
  </li>
  <li>
    <a href="#"><i class="fas fa-comments"></i> <span> Send Feedback </span> </a>

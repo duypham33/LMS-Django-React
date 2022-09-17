@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <h4>Send from {{notice_assoc.notice.sender.get_name}} 
+                in {{notice_assoc.notice.from_course}}</h4>
+             <h5>{{notice_assoc.notice.title}}</h5>
+             <br>
+             <p>Content: {{notice_assoc.notice.content}}</p>
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+
+<div class="content container-fluid">
+    <div class="page-header">
+       <div class="row align-items-center">
+          <div class="col">
+                <h3 class="page-title">
+                Inbox
+                </h3>
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'app:index' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Inbox</li>
+                </ul>
+          </div>
+       </div>
+    </div>
+    
+    {% include 'includes/_inbox.html' %}
+
+ </div>
+
+
+{% endblock %}

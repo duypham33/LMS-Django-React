@@ -6,18 +6,27 @@
                 <table class="table table-hover table-center mb-0 datatable">
                    <thead>
                       <tr>
-                         <th>ID</th>
+                        {% if request.user.user_type == '1' %}
+                           <th>ID</th>
+                         {% endif %}
+
                          <th>Name</th>
                          <th>Email</th>
                          <th>Gender</th>
-                         <th>Course(s)</th>
-                         <th class="text-right">Action</th>
+
+                         {% if request.user.user_type == '1' %}
+                           <th>Course(s)</th>
+                           <th class="text-right">Action</th>
+                         {% endif %}
                       </tr>
                    </thead>
                    <tbody>
                      {% for s in students %}
                       <tr>
-                         <td>{{s.student_id}}</td>
+                        {% if request.user.user_type == '1' %}
+                           <td>{{s.student_id}}</td>
+                         {% endif %}
+
                          <td>
                             <h2 class="table-avatar">
                                <a href="{% url 'teacher:update_student' pk=s.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{s.user.avatar}}" alt="User Image"></a>
@@ -26,6 +35,8 @@
                          </td>
                          <td>{{s.user.email}}</td>
                          <td>{{s.gender}}</td>
+
+                         {% if request.user.user_type == '1' %}
                          <td><a href="{% url 'teacher:coursesOfStud' pk=s.pk %}">View Course List</a></td>
                          <td class="text-right">
                             <div class="actions">
@@ -39,6 +50,8 @@
                                {% endif %}
                             </div>
                          </td>
+                         {% endif %}
+                         
                       </tr>
                       {% endfor %}
                    </tbody>

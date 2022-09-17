@@ -1,6 +1,8 @@
 
+from unittest import result
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from datetime import datetime, timezone
 # Create your models here.
 
 class User(AbstractUser):
@@ -15,7 +17,20 @@ class User(AbstractUser):
             return f'{self.USER[int(self.user_type) - 1][-1]} - {self.first_name} {self.last_name}'
         else:
             return f'{self.USER[int(self.user_type) - 1][-1]} - {self.username}'
+    
+    def get_name(self):
+        return f'{self.first_name} {self.last_name}'
 
+    def get_courses(self):
+        if self.user_type == '1':
+            return self.teacher.courses.all()
+        elif self.user_type == '2':
+            return self.staff.courses.all()
+        else:
+            return self.student.courses.all()
+
+    def unread_inbox(self):
+        return self.notice_assoc.filter(read = False).all()
 
 
 class DateBase(models.Model):
@@ -67,3 +82,53 @@ class Session_Year(models.Model):
 
     class Meta:
         ordering = ['start_date']
+
+
+            
+    
+
+class AssocUserNotice(models.Model):
+    notice = models.ForeignKey("Notification", related_name='assoc', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='notice_assoc', 
+                                 on_delete=models.SET_NULL, blank=True, null=True)
+    read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Notice-{self.notice.id} to {self.receiver.username}'       
+
+
+
+class Notification(DateBase):
+    title = models.CharField(max_length=200, blank=True, null=True)
+    content = models.TextField(max_length = 2500)
+    sender = models.ForeignKey(User, related_name='notices', on_delete=models.SET_NULL, 
+                               blank=True, null=True)
+    from_course = models.ForeignKey(Course, related_name='notices', on_delete=models.SET_NULL, 
+                               blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+    
+    def sendTo(self, receiver):
+        AssocUserNotice.objects.create(notice=self, receiver=receiver)
+
+    def senToList(self, receiver_list):
+        for u in receiver_list:
+            self.sendTo(u)
+
+    def sent_ago(self):
+        duration = datetime.now(timezone.utc) - self.date_created
+        seconds = duration.seconds
+        minutes = divmod(seconds, 60)[0]
+        if minutes < 60:
+            return str(minutes) + ' mins ago' if minutes > 1 else ' min ago'
+        hours = divmod(seconds, 3600)[0]
+        if hours < 24:
+            return str(hours) + ' hours ago' if hours > 1 else ' hour ago'
+        days = divmod(seconds, 86400)[0]
+        if days < 31:
+            return str(days) + ' days ago' if days > 1 else ' day ago'
+        months = divmod(seconds, 2592000)[0]
+        if months < 4:
+            return str(months) + ' months ago' if days > 1 else ' month ago'
+        return 'sent on' + self.date_created.date()

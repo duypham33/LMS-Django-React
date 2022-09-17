@@ -1,0 +1,63 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>Course {% if course %}{{course}}{% endif %}</span></h5>
+                </div>
+                               
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Notification Title</label>
+                        <input type="text" class="form-control" name="title" placeholder="Enter notice title">
+                    </div>
+                </div>
+                
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Content</label>
+                        <textarea class="form-control" name="content"></textarea>
+                    </div>
+                </div>
+                
+                {% if staffs %}
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group">
+                            <label>Send to staff(s) - Choose multiple options by 'alt' key</label>
+                            <select multiple class="form-control" name="staffs">
+                                <option value="all" selected>Send All</option>
+                                {% for s in staffs %}
+                                    <option value="{{s.id}}">{{s}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Send to student(s) - Choose multiple options by 'alt' key</label>
+                        <select multiple class="form-control" name="students">
+                            <option value="all" selected>Send All</option>
+                            {% for s in students %}
+                                <option value="{{s.id}}">{{s}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

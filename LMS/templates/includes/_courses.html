@@ -9,11 +9,20 @@
                       <tr>
                          <th>Subject</th>
                          <th>Title</th>
-                         <th>Created Date</th>
-                         <th>Session</th>
-                         <th>Staffs</th>
-                         <th>Roster</th>
-                         <th class="text-right">Action</th>
+
+                        {% if not send_notice %}
+                           {% if request.user.user_type != '1' %}
+                              <th>Instructor</th>
+                           {% endif %}
+                           <th>Created Date</th>
+                           <th>Session</th>
+                           <th>Staffs</th>
+                           <th>Roster</th>
+                        {% endif %}
+
+                         {% if send_notice or request.user.user_type == '1' %}
+                           <th class="text-right">Action</th>
+                         {% endif %}
                       </tr>
                    </thead>
                    <tbody>
@@ -23,22 +32,51 @@
                          <td> 
                             <a href="{% url 'teacher:update_course' pk=c.pk %}">{{c.title}}</a>                           
                          </td>
-                         <td>{{c.date_created}}</td>
-                         <td>{{c.session}}</td>
-                         <td><a href="{% url 'teacher:view_staffOf_course' pk=c.pk %}">View Staff List</a></td>
-                         <td><a href="{% url 'teacher:view_roster' pk=c.pk %}">View Roster</a></td>
-                         <td class="text-right">
-                            <div class="actions">
-                               <a href="{% url 'teacher:update_course' pk=c.pk %}" class="btn btn-sm bg-success-light mr-2">
-                               <i class="fas fa-pen"></i>
-                               </a>
-                               {% if not name %}
-                               <a href="{% url 'teacher:delete_course' pk=c.pk %}" class="btn btn-sm bg-danger-light">
-                               <i class="fas fa-trash"></i>
-                               </a>
-                               {% endif %}
-                            </div>
-                         </td>
+
+
+                        {% if not send_notice %}
+                           {% if request.user.user_type != '1' %}
+                           <td>
+                              <h2 class="table-avatar">
+                                 <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" 
+                                    src="/{{c.instructor.user.avatar}}" alt="Teacher Image"></a>
+                                 <a href="#">{{c.instructor.user.first_name}} {{c.instructor.user.last_name}}</a>
+                              </h2>
+                           </td>
+                           {% endif %}
+
+
+                           <td>{{c.date_created}}</td>
+                           <td>{{c.session}}</td>
+                           <td><a href="{% url 'teacher:view_staffOf_course' pk=c.pk %}">View Staff List</a></td>
+                           <td><a href="{% url 'teacher:view_roster' pk=c.pk %}">View Roster</a></td>
+                        {% endif %}
+                         
+                         
+                         
+                        {% if not send_notice and request.user.user_type == '1' %}
+                           <td class="text-right">
+                              <div class="actions">
+                                 <a href="{% url 'teacher:update_course' pk=c.pk %}" class="btn btn-sm bg-success-light mr-2">
+                                 <i class="fas fa-pen"></i>
+                                 </a>
+                                 {% if not name %}
+                                 <a href="{% url 'teacher:delete_course' pk=c.pk %}" class="btn btn-sm bg-danger-light">
+                                 <i class="fas fa-trash"></i>
+                                 </a>
+                                 {% endif %}
+                              </div>
+                           </td>
+
+                        {% elif send_notice %}
+                           <td class="text-right">
+                              <div class="actions">
+                                 <a href="{% url 'app:send_notice' pk=c.pk %}" class="btn btn-sm bg-success-light mr-2">
+                                 <i class="fas fa-bell"></i>
+                                 </a>
+                              </div>
+                           </td>
+                        {% endif %}
                       </tr>
                       {% endfor %}
                    </tbody>

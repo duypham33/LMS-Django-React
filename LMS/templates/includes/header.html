@@ -24,71 +24,41 @@
     <ul class="nav user-menu">
        <li class="nav-item dropdown noti-dropdown">
           <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-          <i class="far fa-bell"></i> <span class="badge badge-pill">3</span>
+            <i class="far fa-bell"></i> 
+            {% with num=user.unread_inbox.count %}
+               {% if num > 0 %}
+               <span class="badge badge-pill">{{num}}</span>
+               {% endif %}
+            {% endwith %}
           </a>
+
           <div class="dropdown-menu notifications">
              <div class="topnav-dropdown-header">
                 <span class="notification-title">Notifications</span>
-                <a href="javascript:void(0)" class="clear-noti"> Clear All </a>
+                <a href="javascript:void(0)" class="clear-noti"> Close </a>
              </div>
              <div class="noti-content">
                 <ul class="notification-list">
+                  {% for i in user.unread_inbox %}
                    <li class="notification-message">
-                      <a href="#">
+                      <a href="{% url 'app:inbox' pk=i.pk %}">
                          <div class="media">
                             <span class="avatar avatar-sm">
-                            <img class="avatar-img rounded-circle" alt="User Image" src="{% static 'assets/img/profiles/avatar-02.jpg' %}">
+                            <img class="avatar-img rounded-circle" alt="User Image" src="/{{i.notice.sender.avatar}}">
                             </span>
                             <div class="media-body">
-                               <p class="noti-details"><span class="noti-title">Carlson Tech</span> has approved <span class="noti-title">your estimate</span></p>
-                               <p class="noti-time"><span class="notification-time">4 mins ago</span></p>
+                               <p class="noti-details"><span class="noti-title">{{i.notice.sender.get_name}}</span> sent a notice from 
+                                 <span class="noti-title">{{i.notice.from_course}}</span></p>
+                               <p class="noti-time"><span class="notification-time">{{i.notice.sent_ago}}</span></p>
                             </div>
                          </div>
                       </a>
                    </li>
-                   <li class="notification-message">
-                      <a href="#">
-                         <div class="media">
-                            <span class="avatar avatar-sm">
-                            <img class="avatar-img rounded-circle" alt="User Image" src="{% static 'assets/img/profiles/avatar-11.jpg' %}">
-                            </span>
-                            <div class="media-body">
-                               <p class="noti-details"><span class="noti-title">International Software Inc</span> has sent you a invoice in the amount of <span class="noti-title">$218</span></p>
-                               <p class="noti-time"><span class="notification-time">6 mins ago</span></p>
-                            </div>
-                         </div>
-                      </a>
-                   </li>
-                   <li class="notification-message">
-                      <a href="#">
-                         <div class="media">
-                            <span class="avatar avatar-sm">
-                            <img class="avatar-img rounded-circle" alt="User Image" src="{% static 'assets/img/profiles/avatar-17.jpg' %}">
-                            </span>
-                            <div class="media-body">
-                               <p class="noti-details"><span class="noti-title">John Hendry</span> sent a cancellation request <span class="noti-title">Apple iPhone XR</span></p>
-                               <p class="noti-time"><span class="notification-time">8 mins ago</span></p>
-                            </div>
-                         </div>
-                      </a>
-                   </li>
-                   <li class="notification-message">
-                      <a href="#">
-                         <div class="media">
-                            <span class="avatar avatar-sm">
-                            <img class="avatar-img rounded-circle" alt="User Image" src="{% static 'assets/img/profiles/avatar-13.jpg' %}">
-                            </span>
-                            <div class="media-body">
-                               <p class="noti-details"><span class="noti-title">Mercury Software Inc</span> added a new product <span class="noti-title">Apple MacBook Pro</span></p>
-                               <p class="noti-time"><span class="notification-time">12 mins ago</span></p>
-                            </div>
-                         </div>
-                      </a>
-                   </li>
+                  {% endfor %}
                 </ul>
              </div>
              <div class="topnav-dropdown-footer">
-                <a href="#">View all Notifications</a>
+                <a href="{% url 'app:view_inbox' %}">View all Notifications</a>
              </div>
           </div>
        </li>
@@ -118,7 +88,7 @@
                 </div>
              </div>
              <a class="dropdown-item" href="{% url 'app:profile' %}">My Profile</a>
-             <a class="dropdown-item" href="inbox.html">Inbox</a>
+             <a class="dropdown-item" href="{% url 'app:view_inbox' %}">Inbox</a>
              <a class="dropdown-item" href="{% url 'app:logout' %}">Logout</a>
           </div>
        </li>
