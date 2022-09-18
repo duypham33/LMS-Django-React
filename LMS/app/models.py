@@ -118,17 +118,20 @@ class Notification(DateBase):
 
     def sent_ago(self):
         duration = datetime.now(timezone.utc) - self.date_created
-        seconds = duration.seconds
-        minutes = divmod(seconds, 60)[0]
-        if minutes < 60:
-            return str(minutes) + ' mins ago' if minutes > 1 else ' min ago'
-        hours = divmod(seconds, 3600)[0]
-        if hours < 24:
-            return str(hours) + ' hours ago' if hours > 1 else ' hour ago'
-        days = divmod(seconds, 86400)[0]
+        days = duration.days
+
+        if days < 1:
+            seconds = duration.seconds
+            minutes = divmod(seconds, 60)[0]
+            if minutes < 60:
+                return str(minutes) + ' mins ago' if minutes > 1 else ' min ago'
+            hours = divmod(seconds, 3600)[0]
+            if hours < 24:
+                return str(hours) + ' hours ago' if hours > 1 else ' hour ago'
+        
         if days < 31:
             return str(days) + ' days ago' if days > 1 else ' day ago'
-        months = divmod(seconds, 2592000)[0]
+        months = divmod(days, 30)[0]
         if months < 4:
-            return str(months) + ' months ago' if days > 1 else ' month ago'
+            return str(months) + ' months ago' if months > 1 else ' month ago'
         return 'sent on' + self.date_created.date()
