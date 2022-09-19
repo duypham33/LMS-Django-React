@@ -1,0 +1,41 @@
+<tr class="unread clickable-row">
+    
+    <td class="name">
+        <h2 class="table-avatar">
+            {% if sender_view %}
+            <a href="{% url 'app:inbox' pk=a.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{a.receiver.avatar}}" alt="User Image"></a>
+            <a href="{% url 'app:inbox' pk=a.pk %}">
+                {{a.receiver}}
+            </a>
+            {% else %}
+            <a href="{% url 'app:inbox' pk=a.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{a.leave_request.sender.avatar}}" alt="User Image"></a>
+            <a href="{% url 'app:inbox' pk=a.pk %}">
+                {{a.leave_request.sender}}
+            </a>
+            {% endif %}
+         </h2>
+    </td>
+    
+    <td class="subject"><a href="{% url 'app:inbox' pk=a.pk %}">{{a.leave_request.course}}</a></td>
+    <td class="subject"><a href="{% url 'app:inbox' pk=a.pk %}">Leaving Request</a></td>
+    <td class="mail-date text-muted">{{a.sent_ago}}</td>
+    <td class="text-muted text-right">
+        {% if a.leave_request.status == 'Pending' %}
+            <a href="{% url 'app:inbox' pk=a.pk %}" class="badge badge-info"> Pending </a>
+        {% elif a.leave_request.status == 'Approved' %}
+            <a href="{% url 'app:inbox' pk=a.pk %}" class="badge badge-success"> Approved </a>
+        {% else %}
+            <a href="{% url 'app:inbox' pk=a.pk %}" class="badge badge-danger"> Dispproved </a>
+        {% endif %}
+
+        {% if not sender_view %}
+            {% if a.read %}
+                <span class="ml-3">Read</span>
+            {% else %}
+                <span>Unread</span>
+            {% endif %}
+        {% endif %}
+    </td>
+ </tr>
+
+ 

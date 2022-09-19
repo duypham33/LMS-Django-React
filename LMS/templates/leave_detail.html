@@ -1,0 +1,60 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+            {% if sender_view %}
+             <h4>Leaving request sent to {{leave.notice_assoc.receiver}} 
+                in {{leave.course}}
+            {% else %}
+            <h4>Leaving request from {{leave.sender}} 
+                in {{leave.course}}
+            {% endif %}
+
+            {% if leave.status == 'Pending' %}
+                <span class="badge badge-info"> Pending </span>
+            {% elif leave.status == 'Approved' %}
+                <span class="badge badge-success"> Approved </span>
+            {% else %}
+                <span class="badge badge-danger"> Dispproved </span>
+            {% endif %}
+            </h4>
+
+            <h5>Message: 
+                {% if leave.message %} {{leave.message}} {% else %} N/A {% endif %}
+             </h5>
+             <br>
+
+             {% if not sender_view %}
+                <form action="#" method="post">
+                    {% csrf_token %}
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group">
+                            <label>Action</label>
+                            <select class="form-control" name="action">
+                                <option value="Approved">Approved</option>
+                                <option value="Disapproved">Disapproved</option>
+                                <option value="Pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group">
+                            <label>Reason</label>
+                            <textarea class="form-control" name="reason" rows="9"></textarea>
+                        </div>
+                    </div>
+    
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+             {% endif %}
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

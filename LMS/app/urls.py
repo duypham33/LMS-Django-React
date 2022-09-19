@@ -14,4 +14,8 @@ urlpatterns = [
     path("course/<int:pk>/send_notice/", views.send_notice, name='send_notice'),
     path("inbox/", views.view_inbox, name='view_inbox'),
     path("inbox/<int:pk>/", views.inbox, name='inbox'),
+
+    path("leave/apply/", views.apply_leave, name='apply_leave'),
+    path("leave/history/", views.view_leaves, name='view_leaves'),
+    path("leave/<int:pk>/", views.leave_detail, name='leave_detail'),
 ]

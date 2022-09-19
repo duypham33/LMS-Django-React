@@ -43,14 +43,26 @@
                    <li class="notification-message">
                       <a href="{% url 'app:inbox' pk=i.pk %}">
                          <div class="media">
+                           {% if i.notice %}
                             <span class="avatar avatar-sm">
                             <img class="avatar-img rounded-circle" alt="User Image" src="/{{i.notice.sender.avatar}}">
                             </span>
                             <div class="media-body">
                                <p class="noti-details"><span class="noti-title">{{i.notice.sender.get_name}}</span> sent a notice from 
                                  <span class="noti-title">{{i.notice.from_course}}</span></p>
-                               <p class="noti-time"><span class="notification-time">{{i.notice.sent_ago}}</span></p>
+                               <p class="noti-time"><span class="notification-time">{{i.sent_ago}}</span></p>
                             </div>
+                           {% elif i.leave_request %}
+                              <span class="avatar avatar-sm">
+                              <img class="avatar-img rounded-circle" alt="User Image" src="/{{i.leave_request.sender.avatar}}">
+                              </span>
+                              <div class="media-body">
+                                 <p class="noti-details"><span class="noti-title">
+                                 {{i.leave_request.sender.get_name}}</span> requested leaving 
+                                 <span class="noti-title">{{i.leave_request.course}}</span></p>
+                                 <p class="noti-time"><span class="notification-time">{{i.sent_ago}}</span></p>
+                              </div>
+                           {% endif %}
                          </div>
                       </a>
                    </li>

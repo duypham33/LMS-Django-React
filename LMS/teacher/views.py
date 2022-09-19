@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 # import datetime
-from app.models import User, Session_Year, Subject, Course
+from app.models import User, Session_Year, Subject, Course, Leave, AssocUserNotice, Notification
 from django.contrib import messages
 from student.models import Student
 from staff.models import Staff
@@ -440,3 +440,54 @@ def update_session(request, pk):
             messages.warning(request, 'Missing date!')
 
     return render(request, 'teacher/update_session.html', {'session': session})
+
+
+
+
+@login_required(login_url='login/')
+def view_leaves(request):
+    notice_assoc = request.user.notice_assoc.filter(notice = None).all()
+    return render(request, 'inbox.html', {'notice_assoc': notice_assoc, 'cater': 'Leaving Request'})
+
+
+@login_required(login_url='login/')
+def leave_detail(request, pk):
+    notice_assoc = AssocUserNotice.objects.get(pk = pk)
+    leave = notice_assoc.leave_request
+
+    if leave.notice_assoc.read == False:
+        leave.notice_assoc.read = True
+        leave.notice_assoc.save()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        reason = request.POST.get('reason')
+        if not reason or reason == '':
+            reason = 'N/A'
+
+        if action and action != '':
+            leave.status = action
+            leave.save()
+
+            #Re-Notice to the sender
+            course = leave.course
+            action = action.lower()
+            
+            notice = Notification.objects.create(title=f'Your leaving request on {course} was {action}!',
+            content=f'{request.user} {action} your request on {course}!\nReason: {reason}',
+            sender=request.user, from_course=course)
+
+            notice.sendTo(leave.sender)
+
+            #Delete if approved
+            if action == 'approved':
+                leave.sender.get_role().courses.remove(course)
+                messages.success(request, f'Your response was sent to {leave.sender}! You removed {leave.sender.get_name()} out of {course}!')
+            else:
+                messages.success(request, f'Your response was sent to {leave.sender}!')
+
+    return render(request, 'leave_detail.html', {'leave': leave})
+
+
+
+

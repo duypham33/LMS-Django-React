@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Course, Subject, Session_Year, Notification, AssocUserNotice
+from .models import User, Course, Subject, Session_Year, Notification, AssocUserNotice, Leave
 
 # Register your models here.
 
@@ -12,3 +12,4 @@ admin.site.register(Subject)
 admin.site.register(Session_Year)
 admin.site.register(Notification)
 admin.site.register(AssocUserNotice)
+admin.site.register(Leave)

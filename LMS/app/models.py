@@ -1,4 +1,5 @@
 
+from email import message
 from unittest import result
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -20,6 +21,14 @@ class User(AbstractUser):
     
     def get_name(self):
         return f'{self.first_name} {self.last_name}'
+
+    def get_role(self):
+        if self.user_type == '1':
+            return self.teacher
+        elif self.user_type == '2':
+            return self.staff
+        else:
+            return self.student
 
     def get_courses(self):
         if self.user_type == '1':
@@ -87,34 +96,22 @@ class Session_Year(models.Model):
             
     
 
-class AssocUserNotice(models.Model):
-    notice = models.ForeignKey("Notification", related_name='assoc', on_delete=models.CASCADE)
+class AssocUserNotice(DateBase):
+    notice = models.ForeignKey("Notification", related_name='assoc', on_delete=models.CASCADE, 
+                                blank=True, null=True)
     receiver = models.ForeignKey(User, related_name='notice_assoc', 
                                  on_delete=models.SET_NULL, blank=True, null=True)
     read = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f'Notice-{self.notice.id} to {self.receiver.username}'       
-
-
-
-class Notification(DateBase):
-    title = models.CharField(max_length=200, blank=True, null=True)
-    content = models.TextField(max_length = 2500)
-    sender = models.ForeignKey(User, related_name='notices', on_delete=models.SET_NULL, 
-                               blank=True, null=True)
-    from_course = models.ForeignKey(Course, related_name='notices', on_delete=models.SET_NULL, 
-                               blank=True, null=True)
+    class Meta:
+        ordering = ['-date_created']
 
     def __str__(self):
-        return self.title
-    
-    def sendTo(self, receiver):
-        AssocUserNotice.objects.create(notice=self, receiver=receiver)
-
-    def senToList(self, receiver_list):
-        for u in receiver_list:
-            self.sendTo(u)
+        if self.notice:
+            return f'Notice-{self.notice.id} to {self.receiver.username}'
+        elif self.leave_request:
+            return f'Leave-{self.leave_request.id} to {self.receiver.username}' 
+        return f'to {self.receiver.username}'      
 
     def sent_ago(self):
         duration = datetime.now(timezone.utc) - self.date_created
@@ -135,3 +132,42 @@ class Notification(DateBase):
         if months < 4:
             return str(months) + ' months ago' if months > 1 else ' month ago'
         return 'sent on' + self.date_created.date()
+
+
+class Notification(DateBase):
+    title = models.CharField(max_length=200, blank=True, null=True)
+    content = models.TextField(max_length = 2500)
+    sender = models.ForeignKey(User, related_name='notices', on_delete=models.SET_NULL, 
+                               blank=True, null=True)
+    from_course = models.ForeignKey(Course, related_name='notices', on_delete=models.SET_NULL, 
+                               blank=True, null=True)
+
+    def __str__(self):
+        return self.title
+    
+    def sendTo(self, receiver):
+        AssocUserNotice.objects.create(notice=self, receiver=receiver)
+
+    def senToList(self, receiver_list):
+        for u in receiver_list:
+            self.sendTo(u)
+
+
+class Leave(models.Model):
+    sender = models.ForeignKey(User, related_name='leave_requests', on_delete=models.SET_NULL,
+                                null=True, blank=True)
+    course = models.ForeignKey(Course, related_name='leave_requests', on_delete=models.SET_NULL,
+                                null=True, blank=True)
+    message = models.TextField(max_length=2000, blank=True, null=True)
+
+    STATUS = (('Pending', 'Pending'), ('Approved', 'Approved'), ('Disapproved', 'Disapproved'))
+    status = models.CharField(choices=STATUS, max_length=20, default='Pending')
+
+    notice_assoc = models.OneToOneField(AssocUserNotice, related_name='leave_request', 
+                                        on_delete=models.SET_NULL, blank=True, null=True)
+    
+    def __str__(self):
+        return f'{self.sender} requests on {self.course}'
+
+
+

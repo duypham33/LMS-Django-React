@@ -36,4 +36,7 @@ urlpatterns = [
     path("staff/edit/<int:pk>", views.edit_a_staff, name='update_staff'),
     path("staff/delete/<int:pk>", views.delete_staff, name='delete_staff'),
     path("staff/<int:pk>/courses", views.view_coursesOf_staff, name='coursesOfStaff'),
+
+    path("leaves/", views.view_leaves, name="view_leaves"),
+    path("leave/<int:pk>/", views.leave_detail, name='leave_detail'),
 ]
