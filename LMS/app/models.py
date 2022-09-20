@@ -103,15 +103,28 @@ class AssocUserNotice(DateBase):
                                  on_delete=models.SET_NULL, blank=True, null=True)
     read = models.BooleanField(default=False)
 
+    showed_on_inbox = models.CharField(max_length=100, default='sent a notice from')
+
+    ROLE = (('Notice', 'Notice'), ('Leave', 'Leave'), ('Feedback', 'Feedback'))
+    role = models.CharField(choices=ROLE, max_length=20, default='Notice')
+
     class Meta:
         ordering = ['-date_created']
 
     def __str__(self):
-        if self.notice:
+        if self.role == 'Notice':
             return f'Notice-{self.notice.id} to {self.receiver.username}'
-        elif self.leave_request:
+        elif self.role == 'Leave':
             return f'Leave-{self.leave_request.id} to {self.receiver.username}' 
         return f'to {self.receiver.username}'      
+
+
+    def get_role(self):
+        if self.role == 'Notice':
+            return self.notice
+        elif self.role == 'Leave':
+            return self.leave_request
+        
 
     def sent_ago(self):
         duration = datetime.now(timezone.utc) - self.date_created
@@ -145,8 +158,8 @@ class Notification(DateBase):
     def __str__(self):
         return self.title
     
-    def sendTo(self, receiver):
-        AssocUserNotice.objects.create(notice=self, receiver=receiver)
+    def sendTo(self, receiver, showed_on_inbox='sent a notice from'):
+        AssocUserNotice.objects.create(notice=self, receiver=receiver, showed_on_inbox=showed_on_inbox)
 
     def senToList(self, receiver_list):
         for u in receiver_list:
@@ -156,7 +169,7 @@ class Notification(DateBase):
 class Leave(models.Model):
     sender = models.ForeignKey(User, related_name='leave_requests', on_delete=models.SET_NULL,
                                 null=True, blank=True)
-    course = models.ForeignKey(Course, related_name='leave_requests', on_delete=models.SET_NULL,
+    from_course = models.ForeignKey(Course, related_name='leave_requests', on_delete=models.SET_NULL,
                                 null=True, blank=True)
     message = models.TextField(max_length=2000, blank=True, null=True)
 
@@ -167,7 +180,9 @@ class Leave(models.Model):
                                         on_delete=models.SET_NULL, blank=True, null=True)
     
     def __str__(self):
-        return f'{self.sender} requests on {self.course}'
+        return f'{self.sender} requests on {self.from_course}'
 
 
 
+# class Feedback(models.Model):
+#     notice = models.OneToOneField(Notification, related_name='inbox', on_delete=models.CASCADE)

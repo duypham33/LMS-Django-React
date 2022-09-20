@@ -7,10 +7,10 @@
           <div class="card-body">
             {% if sender_view %}
              <h4>Leaving request sent to {{leave.notice_assoc.receiver}} 
-                in {{leave.course}}
+                in {{leave.from_course}}
             {% else %}
             <h4>Leaving request from {{leave.sender}} 
-                in {{leave.course}}
+                in {{leave.from_course}}
             {% endif %}
 
             {% if leave.status == 'Pending' %}

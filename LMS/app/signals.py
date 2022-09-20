@@ -1,7 +1,7 @@
 
 from django.db.models.signals import post_save, pre_save, pre_delete, m2m_changed
 from django.dispatch import receiver
-from .models import User, Course
+from .models import User, Course, Notification
 from teacher.models import Teacher
 from student.models import Student
 from staff.models import Staff
@@ -60,6 +60,12 @@ def adjust_students_in_courses(sender, instance, action, **kwargs):
                     for s in c.students.all():
                         if not instance.is_my_student(s):
                             instance.students.add(s)
+
+                    _sender = c.instructor.user
+                    notice = Notification.objects.create(title=f'{_sender} added you into {c}!',
+                    content=f'{_sender} added you into {c}!', sender=_sender, from_course=c)
+
+                    notice.sendTo(instance.user, showed_on_inbox=f'added you into ')
                 except:
                     pass
 
@@ -72,6 +78,14 @@ def adjust_students_in_courses(sender, instance, action, **kwargs):
                     for s in c.students.all():
                         if instance.courses.filter(students__student_id = s.student_id).exists() == False:
                             instance.students.remove(s)
+
+                    #Send notice
+                    _sender = c.instructor.user
+                    notice = Notification.objects.create(title=f'{_sender} removed you out of {c}!',
+                    content=f'{_sender} removed you out of {c}!',
+                    sender=_sender, from_course=c)
+
+                    notice.sendTo(instance.user, showed_on_inbox=f'removed you out of ')
                 except:
                     pass
 
@@ -87,6 +101,14 @@ def adjust_staffs_in_courses(sender, instance, action, **kwargs):
                     for s in c.staffs.all():
                         if not instance.is_my_staff(s):
                             instance.staffs.add(s)
+                    
+                    #Send notice
+                    _sender = c.instructor.user
+                    notice = Notification.objects.create(title=f'{_sender} added you into {c}!',
+                    content=f'{_sender} added you into {c}!',
+                    sender=_sender, from_course=c)
+
+                    notice.sendTo(instance.user, showed_on_inbox=f'added you into ')
                 except:
                     pass
 
@@ -99,6 +121,14 @@ def adjust_staffs_in_courses(sender, instance, action, **kwargs):
                     for s in c.staffs.all():
                         if instance.courses.filter(staffs__staff_id = s.staff_id).exists() == False:
                             instance.staffs.remove(s)
+
+                    #Send notice
+                    _sender = c.instructor.user
+                    notice = Notification.objects.create(title=f'{_sender} removed you out of {c}!',
+                    content=f'{_sender} removed you out of {c}!',
+                    sender=_sender, from_course=c)
+
+                    notice.sendTo(instance.user, showed_on_inbox=f'removed you out of ')
                 except:
                     pass
 

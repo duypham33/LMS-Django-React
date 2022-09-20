@@ -446,7 +446,7 @@ def update_session(request, pk):
 
 @login_required(login_url='login/')
 def view_leaves(request):
-    notice_assoc = request.user.notice_assoc.filter(notice = None).all()
+    notice_assoc = request.user.notice_assoc.filter(role = 'Leave').all()
     return render(request, 'inbox.html', {'notice_assoc': notice_assoc, 'cater': 'Leaving Request'})
 
 
@@ -470,14 +470,14 @@ def leave_detail(request, pk):
             leave.save()
 
             #Re-Notice to the sender
-            course = leave.course
+            course = leave.from_course
             action = action.lower()
             
             notice = Notification.objects.create(title=f'Your leaving request on {course} was {action}!',
             content=f'{request.user} {action} your request on {course}!\nReason: {reason}',
             sender=request.user, from_course=course)
 
-            notice.sendTo(leave.sender)
+            notice.sendTo(leave.sender, showed_on_inbox=f'{action} your leaving request on ')
 
             #Delete if approved
             if action == 'approved':

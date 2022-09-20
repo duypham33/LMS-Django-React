@@ -104,24 +104,27 @@ def view_inbox(request):
 
     return render(request, 'inbox.html', {'notice_assoc': notice_assoc, 'cater': 'Inbox'})
 
+
+
 @login_required(login_url='login/')
 def inbox(request, pk):
     notice_assoc = AssocUserNotice.objects.get(pk = pk)
-    if notice_assoc.notice:
+    if notice_assoc.role == 'Notice':
         if notice_assoc.read == False:
             notice_assoc.read = True
             notice_assoc.save()
         return render(request, 'inbox_detail.html', {'notice_assoc': notice_assoc})
-    elif notice_assoc.leave_request and request.user.user_type == '1':
+    elif notice_assoc.role == 'Leave' and request.user.user_type == '1':
         return redirect('teacher:leave_detail', pk=pk)
-    else:
+    elif notice_assoc.role == 'Leave':
         return redirect('app:leave_detail', pk=pk)
+
 
 
 @login_required(login_url='login/')
 def apply_leave(request):
     courses = request.user.get_courses()
-    pending_courses = [l.course for l in request.user.leave_requests.filter(status = 'Pending').all()]
+    pending_courses = [l.from_course for l in request.user.leave_requests.filter(status = 'Pending').all()]
     context = {'courses': courses, 'pending_courses': pending_courses}
     
     if request.method == 'POST':
@@ -137,8 +140,9 @@ def apply_leave(request):
                 course_list = [Course.objects.get(id = id) for id in courseIDs]
             for c in course_list:
                 if c not in pending_courses:
-                    assoc  = AssocUserNotice.objects.create(receiver = c.instructor.user)
-                    new_leave = Leave.objects.create(sender = request.user, course = c, message = message, 
+                    assoc  = AssocUserNotice.objects.create(receiver = c.instructor.user, role = 'Leave',
+                                                 showed_on_inbox = 'sent you leaving request on')
+                    new_leave = Leave.objects.create(sender = request.user, from_course = c, message = message, 
                                     notice_assoc = assoc)
 
             messages.success(request, f'Your request is sent!')
@@ -165,3 +169,36 @@ def leave_detail(request, pk):
     leave = notice_assoc.leave_request
     
     return render(request, 'leave_detail.html', {'leave': leave, 'sender_view': True})
+
+
+
+
+# @login_required(login_url='login/')
+# def apply_leave(request):
+#     courses = request.user.get_courses()
+#     pending_courses = [l.course for l in request.user.leave_requests.filter(status = 'Pending').all()]
+#     context = {'courses': courses, 'pending_courses': pending_courses}
+    
+#     if request.method == 'POST':
+#         message = request.POST.get('message')
+#         courseIDs = request.POST.getlist('courses', None)
+
+#         if message == '':
+#             message = None
+#         if courseIDs and courseIDs != []:
+#             if 'all' in courseIDs:
+#                 course_list = courses
+#             else:
+#                 course_list = [Course.objects.get(id = id) for id in courseIDs]
+#             for c in course_list:
+#                 if c not in pending_courses:
+#                     assoc  = AssocUserNotice.objects.create(receiver = c.instructor.user)
+#                     new_leave = Leave.objects.create(sender = request.user, course = c, message = message, 
+#                                     notice_assoc = assoc)
+
+#             messages.success(request, f'Your request is sent!')
+#             redirect('app:apply_leave')
+#         else:
+#             messages.warning(request, 'Choose the course you would like to leave!')
+        
+#     return render(request, 'apply_leave.html', context=context)
