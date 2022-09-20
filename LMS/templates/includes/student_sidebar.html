@@ -23,7 +23,11 @@
 </li>
 
 <li>
-  <a href="#"><i class="fas fa-comments"></i> <span> Send Feedback </span> </a>
+  <a href="#"><i class="fas fa-comments"></i> <span> Feedback </span><span class="menu-arrow"></span> </a>
+  <ul>
+      <li><a href="{% url 'app:send_feedback' %}">Send Feedback</a></li>
+      <li><a href="{% url 'app:view_feedbacks' %}"> Feedback History </a></li>
+   </ul>
 </li>
 <li>
    <a href="#"><i class="fas fa-envelope"></i> <span> Apply For Leave</span> <span class="menu-arrow"></span> </a>

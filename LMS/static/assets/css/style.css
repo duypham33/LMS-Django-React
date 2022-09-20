@@ -842,7 +842,7 @@ button.bg-danger:hover {
 	font-size: 14px;
 }
 .card {
-    border: 1px solid #ececf5;
+    border: 3px solid black;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03);
     margin-bottom: 1.875rem;
 }
@@ -850,17 +850,17 @@ button.bg-danger:hover {
 	padding: 1.5rem;
 }
 .card-header {
-	border-bottom: 1px solid #e6e6e6;
+	border-bottom: 3px solid black;
 	padding: 1rem 1.5rem;
 }
 .card-footer {
 	background-color: #fff;
-	border-top: 1px solid #e6e6e6;
+	border-top: 3px solid black;
 	padding: 1rem 1.5rem;
 }
 .card .card-header {
     background-color: #fff;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 3px solid black;
 }
 .card .card-header .card-title {
     margin-bottom: 0;

@@ -39,4 +39,6 @@ urlpatterns = [
 
     path("leaves/", views.view_leaves, name="view_leaves"),
     path("leave/<int:pk>/", views.leave_detail, name='leave_detail'),
+
+    path("feedbacks/<str:user_type>", views.view_feedbacks, name="view_feedbacks"),
 ]

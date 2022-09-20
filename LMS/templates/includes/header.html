@@ -39,6 +39,7 @@
              </div>
              <div class="noti-content">
                 <ul class="notification-list">
+                  
                   {% for i in user.unread_inbox %}
                    <li class="notification-message">
                       <a href="{% url 'app:inbox' pk=i.pk %}">

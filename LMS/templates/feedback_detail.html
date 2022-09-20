@@ -1,0 +1,26 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+            {% if sender_view == False %}
+                <h4>Sent from @<a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{feedback.sender.avatar}}" alt="User Image"></a>
+                    {{feedback.sender.get_name}} 
+                    in {{feedback.from_course}}</h4>
+            {% else %}
+                <h4>Sent to @<a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{feedback.notice_assoc.receiver.avatar}}" alt="User Image"></a>
+                    {{feedback.notice_assoc.receiver.get_name}} 
+                    in {{feedback.from_course}}</h4>
+            {% endif %}
+
+             <br>
+             {% with post=feedback %}
+                {% include 'includes/_post.html' %}
+             {% endwith %}
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

@@ -489,5 +489,10 @@ def leave_detail(request, pk):
     return render(request, 'leave_detail.html', {'leave': leave})
 
 
+@login_required(login_url='login/')
+def view_feedbacks(request, user_type):
+    cater = 'Staff Feedbacks' if user_type == '2' else 'Student Feedbacks'
+    notice_assoc = request.user.notice_assoc.filter(feedback__sender__user_type = user_type).all()
 
+    return render(request, 'inbox.html', {'notice_assoc': notice_assoc, 'cater': cater})
 

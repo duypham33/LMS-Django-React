@@ -24,9 +24,13 @@
             <tbody>
               {% for a in notice_assoc %}
                {% if a.notice %}
-                  {% include 'includes/_inbox.html' %}
+                  {% include 'includes/_notice.html' %}
                {% elif a.leave_request %}
-                  {% include 'includes/_leaves.html' %}
+                  {% include 'includes/_leave.html' %}
+               {% elif a.feedback %}
+                  {% include 'includes/_feedback.html' %}
+               {% elif a.reply %}
+                  {% include 'includes/_reply.html' %}
                {% endif %}
               {% endfor %}
             </tbody>

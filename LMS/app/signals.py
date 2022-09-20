@@ -1,7 +1,7 @@
 
 from django.db.models.signals import post_save, pre_save, pre_delete, m2m_changed
 from django.dispatch import receiver
-from .models import User, Course, Notification
+from .models import User, Course, Notification, AssocUserNotice, Reply
 from teacher.models import Teacher
 from student.models import Student
 from staff.models import Staff
@@ -147,3 +147,20 @@ def teacher_remove_staff(sender, instance, action, **kwargs):
                             staff.courses.remove(c)
                 except:
                     pass
+
+
+@receiver(post_save, sender=Reply)
+def create_reply(sender, instance, created, **kwargs):
+    if created:
+        if instance.on_feedback:
+            instance.pk_url = instance.on_feedback.notice_assoc.pk
+            _receiver = instance.on_feedback.sender
+        else:
+            instance.pk_url = instance.on_the_reply.pk_url
+            _receiver = instance.on_the_reply.sender
+
+        a = AssocUserNotice.objects.create(receiver=_receiver, role='Reply',
+                            showed_on_inbox='replied on your post!')
+        instance.notice_assoc = a
+        instance.save()
+        

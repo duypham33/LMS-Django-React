@@ -8,7 +8,7 @@
          </h2>
     </td>
     <td class="subject"><a href="{% url 'app:inbox' pk=a.pk %}">{{a.notice.from_course}}</a></td>
-    <td class="subject"><a href="{% url 'app:inbox' pk=a.pk %}">{{a.notice.title}}</a></td>
+    <td class="subject"><a href="{% url 'app:inbox' pk=a.pk %}"><i class="fas fa-bullhorn mr-1"></i>{{a.notice.title}}</a></td>
     <td class="mail-date text-muted">{{a.sent_ago}}</td>
     <td class="text-muted text-right">
         {% if a.read %}

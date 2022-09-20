@@ -50,10 +50,10 @@
    <a href="{% url 'app:select_course_send_notice' %}"><i class="fas fa-bell"></i> <span> Send Notification </span> </a>
  </li>
  <li>
-   <a href="#"><i class="fas fa-comments"></i> <span> Staff Feedback</span> </a>
+   <a href="{% url 'teacher:view_feedbacks' user_type=2 %}"><i class="fas fa-comments"></i> <span> Staff Feedback</span> </a>
  </li>
  <li>
-   <a href="#"><i class="fas fa-comments"></i> <span> Student Feedback </span> </a>
+   <a href="{% url 'teacher:view_feedbacks' user_type=3 %}"><i class="fas fa-comments"></i> <span> Student Feedback </span> </a>
  </li>
  <li>
    <a href="{% url 'teacher:view_leaves' %}"><i class="fas fa-envelope"></i><span>Leaving Requests</span></a>

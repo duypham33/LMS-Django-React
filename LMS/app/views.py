@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib import messages
 import os
-from .models import User, Course, Notification, AssocUserNotice, Leave
+from .models import User, Course, Notification, AssocUserNotice, Leave, Feedback, Reply
 # Create your views here.
 
 @login_required(login_url='login/')
@@ -118,6 +118,13 @@ def inbox(request, pk):
         return redirect('teacher:leave_detail', pk=pk)
     elif notice_assoc.role == 'Leave':
         return redirect('app:leave_detail', pk=pk)
+    elif notice_assoc.role == 'Feedback':
+        return redirect('app:feedback_detail', pk=pk)
+    elif notice_assoc.role == 'Reply':
+        if notice_assoc.read == False:
+            notice_assoc.read = True
+            notice_assoc.save()
+        return redirect('app:inbox', pk=notice_assoc.reply.pk_url)
 
 
 
@@ -173,32 +180,79 @@ def leave_detail(request, pk):
 
 
 
-# @login_required(login_url='login/')
-# def apply_leave(request):
-#     courses = request.user.get_courses()
-#     pending_courses = [l.course for l in request.user.leave_requests.filter(status = 'Pending').all()]
-#     context = {'courses': courses, 'pending_courses': pending_courses}
+@login_required(login_url='login/')
+def send_feedback(request):
+    courses = request.user.get_courses()
+    context = {'courses': courses}
     
-#     if request.method == 'POST':
-#         message = request.POST.get('message')
-#         courseIDs = request.POST.getlist('courses', None)
+    if request.method == 'POST':
+        comment = request.POST.get('comment')
+        courseIDs = request.POST.getlist('courses', None)
 
-#         if message == '':
-#             message = None
-#         if courseIDs and courseIDs != []:
-#             if 'all' in courseIDs:
-#                 course_list = courses
-#             else:
-#                 course_list = [Course.objects.get(id = id) for id in courseIDs]
-#             for c in course_list:
-#                 if c not in pending_courses:
-#                     assoc  = AssocUserNotice.objects.create(receiver = c.instructor.user)
-#                     new_leave = Leave.objects.create(sender = request.user, course = c, message = message, 
-#                                     notice_assoc = assoc)
+        if courseIDs and courseIDs != []:
+            if 'all' in courseIDs:
+                course_list = courses
+            else:
+                course_list = [Course.objects.get(id = id) for id in courseIDs]
+            for c in course_list:
+                assoc  = AssocUserNotice.objects.create(receiver = c.instructor.user, role='Feedback',
+                            showed_on_inbox = 'sent you feedback on ')
+                Feedback.objects.create(sender = request.user, from_course = c, comment = comment, 
+                            notice_assoc = assoc)
 
-#             messages.success(request, f'Your request is sent!')
-#             redirect('app:apply_leave')
-#         else:
-#             messages.warning(request, 'Choose the course you would like to leave!')
+            messages.success(request, f'Your feedback is sent!')
+        else:
+            messages.warning(request, 'Choose the course you would like to send your feedback!')
         
-#     return render(request, 'apply_leave.html', context=context)
+    return render(request, 'send_feedback.html', context=context)
+
+
+
+@login_required(login_url='login/')
+def view_feedbacks(request):
+    notice_assoc = AssocUserNotice.objects.filter(feedback__sender = request.user).all()
+    context = {'notice_assoc': notice_assoc, 'sender_view': True, 'cater': 'Feedback History'}
+
+    return render(request, 'inbox.html', context=context)
+
+
+
+@login_required(login_url='login/')
+def feedback_detail(request, pk):
+    notice_assoc = AssocUserNotice.objects.get(pk = pk)
+    fb = notice_assoc.feedback
+    sender_view = True
+
+    #Current user is receiver
+    if fb.sender != request.user:
+        sender_view = False   
+        if notice_assoc.read == False:
+            notice_assoc.read = True
+            notice_assoc.save()
+
+    return render(request, 'feedback_detail.html', {'feedback': fb, 'sender_view': sender_view})
+
+
+
+@login_required(login_url='login/')
+def reply(request):
+    if request.method == 'POST':
+        pk = request.POST.get('assoc-pk')
+        comment = request.POST.get('comment')
+
+        notice_assoc = AssocUserNotice.objects.get(pk = pk)
+        if notice_assoc.role == 'Feedback':
+            r = Reply.objects.create(sender=request.user, comment=comment, 
+                                     on_feedback=notice_assoc.feedback)
+        elif notice_assoc.role == 'Reply':
+            r = Reply.objects.create(sender=request.user, comment=comment, 
+                                 on_the_reply=notice_assoc.reply)
+
+        messages.success(request, 'Your reply is posted!')
+        
+    return redirect('app:inbox', pk=r.pk_url)
+
+
+
+
+

@@ -18,4 +18,10 @@ urlpatterns = [
     path("leave/apply/", views.apply_leave, name='apply_leave'),
     path("leave/history/", views.view_leaves, name='view_leaves'),
     path("leave/<int:pk>/", views.leave_detail, name='leave_detail'),
+
+    path("feedback/new/", views.send_feedback, name='send_feedback'),
+    path("feedback/history/", views.view_feedbacks, name='view_feedbacks'),
+    path("feedback/<int:pk>/", views.feedback_detail, name='feedback_detail'),
+
+    path("reply/", views.reply, name='reply'),
 ]
