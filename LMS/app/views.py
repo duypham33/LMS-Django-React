@@ -236,8 +236,9 @@ def feedback_detail(request, pk):
 
 @login_required(login_url='login/')
 def reply(request):
+    
     if request.method == 'POST':
-        pk = request.POST.get('assoc-pk')
+        pk = request.POST.get('pk')
         comment = request.POST.get('comment')
 
         notice_assoc = AssocUserNotice.objects.get(pk = pk)
@@ -247,12 +248,8 @@ def reply(request):
         elif notice_assoc.role == 'Reply':
             r = Reply.objects.create(sender=request.user, comment=comment, 
                                  on_the_reply=notice_assoc.reply)
-
         messages.success(request, 'Your reply is posted!')
         
     return redirect('app:inbox', pk=r.pk_url)
-
-
-
 
 

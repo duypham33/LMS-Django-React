@@ -5,15 +5,16 @@
         <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{post.sender.avatar}}" alt="User Image"></a> 
         <strong> {{post.sender.get_name}} </strong> 
     </div>
-    
+    {% with p=post.notice_assoc.pk %}
     <div class="card-body d-flex flex-row justify-content-between">
         <div> <p> {{post.comment}} </p> </div>
         
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#formModal">
+        
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#formModal-{{p}}">
             Reply
         </button>
         
-        <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+        <div class="modal fade" id="formModal-{{p}}" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -22,7 +23,7 @@
                             <strong> {{user.get_name}} </strong> 
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <form method="post" action="{% url 'app:reply' %}"> 
@@ -37,15 +38,17 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" name="assoc-pk" value="{{post.notice_assoc.pk}}">Send</button>
+                            <button type="submit" class="btn btn-primary" name="pk" value="{{p}}">Send</button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
         
+        
     </div>
-
+    {% endwith %}
     <div class="card-footer text-muted"> Posted on: {{post.notice_assoc.sent_ago}} </div>
 </div>
 
