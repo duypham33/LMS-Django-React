@@ -1,11 +1,11 @@
-
+{% load active_link_tags %}
 <li class="menu-title">
     <span>Main Menu</span>
  </li>
- <li class="submenu active">
-    <a href="{% url 'teacher:teaHome' %}"><i class="fas fa-user-graduate"></i> <span> Dashboard</span></a>
+ <li class="{% active_link 'teacher:teaHome' 'active' %}">
+    <a href="{% url 'teacher:teaHome' %}"><i class="fas fa-home"></i> <span> Dashboard</span></a>
  </li>
- <li class="submenu">
+ <li class="submenu {% active_link 'teacher:view_students' 'active' %} {% active_link 'teacher:add_student' 'active' %} {% active_link 'teacher:edit_student' 'active' %}">
     <a href="#"><i class="fas fa-user-graduate"></i> <span> Students</span> <span class="menu-arrow"></span></a>
     <ul>
        <li><a href="{% url 'teacher:view_students' %}">View Students</a></li>
@@ -13,7 +13,7 @@
        <li><a href="{% url 'teacher:edit_student' %}">Edit Student</a></li>
     </ul>
  </li>
- <li class="submenu">
+ <li class="submenu {% active_link 'teacher:view_staffs' 'active' %} {% active_link 'teacher:add_staff' 'active' %} {% active_link 'teacher:edit_staff' 'active' %}">
     <a href="#"><i class="fas fa-chalkboard-teacher"></i> <span> Staff</span> <span class="menu-arrow"></span></a>
     <ul>
        <li><a href="{% url 'teacher:view_staffs' %}"> View Staff</a></li>
@@ -21,7 +21,7 @@
        <li><a href="{% url 'teacher:edit_staff' %}">Edit Staff</a></li>
     </ul>
  </li>
- <li class="submenu">
+ <li class="submenu {% active_link 'teacher:view_courses' 'active' %} {% active_link 'teacher:add_course' 'active' %} {% active_link 'teacher:edit_course' 'active' %}">
     <a href="#"><i class="fa fa-graduation-cap"></i> <span> Courses</span> <span class="menu-arrow"></span></a>
     <ul>
        <li><a href="{% url 'teacher:view_courses' %}">Courses List</a></li>
@@ -29,14 +29,14 @@
        <li><a href="{% url 'teacher:edit_course' %}"> Edit Course </a></li>
     </ul>
  </li>
- <li class="submenu">
+ <li class="submenu {% active_link 'teacher:view_subjects' 'active' %} {% active_link 'teacher:add_subject' 'active' %}">
     <a href="#"><i class="fas fa-book-reader"></i> <span> Subjects</span> <span class="menu-arrow"></span></a>
     <ul>
        <li><a href="{% url 'teacher:view_subjects' %}">Subject List</a></li>
        <li><a href="{% url 'teacher:add_subject' %}"> Add Subject </a></li>
     </ul>
  </li>
- <li>
+ <li class="submenu {% active_link 'teacher:view_sessions' 'active' %} {% active_link 'teacher:add_session' 'active' %}">
    <a href="#"><i class="fa fa-clock"></i> <span> Sessions</span> <span class="menu-arrow"></span></a>
    <ul>
       <li><a href="{% url 'teacher:view_sessions' %}">Session List</a></li>
@@ -46,7 +46,7 @@
  <li>
    <a href="#"><i class="fa fa-calendar"></i> <span> View Attendance</span> </a>
  </li>
- <li>
+ <li class="{% active_link 'app:select_course_send_notice' 'active' %}">
    <a href="{% url 'app:select_course_send_notice' %}"><i class="fas fa-bell"></i> <span> Send Notification </span> </a>
  </li>
  <li>
@@ -55,6 +55,6 @@
  <li>
    <a href="{% url 'teacher:view_feedbacks' user_type=3 %}"><i class="fas fa-comments"></i> <span> Student Feedback </span> </a>
  </li>
- <li>
+ <li class="{% active_link 'teacher:view_leaves' 'active' %}">
    <a href="{% url 'teacher:view_leaves' %}"><i class="fas fa-envelope"></i><span>Leaving Requests</span></a>
  </li>

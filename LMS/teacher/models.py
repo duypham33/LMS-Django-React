@@ -51,6 +51,8 @@ class Teacher(models.Model):
         #thePerson.save()
         #Be careful when add and remove, students, or staffs, assignments should be updated with signals
 
+        #Note: It looks like thePerson.courses.set(course_list, clear=False), but in fact it is different,
+        #since we need to check courses of different instructors.
 
     def edit_staffsOf_course(self, theCourse, staffID_list):
         current_list = theCourse.staffs.all()
@@ -65,3 +67,4 @@ class Teacher(models.Model):
         #theStudent.save()
         #Be careful when add and remove, staffs, assignments should be updated with signals
 
+        #Note: It is the same with theCourse.staffs.set(staff_list, clear=False)

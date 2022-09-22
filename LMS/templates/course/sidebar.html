@@ -1,0 +1,28 @@
+{% load active_link_tags %}
+<li class="menu-title">
+    <span>Course Menu</span>
+ </li>
+ <li class="{% active_link 'app:index' 'active' %}">
+    <a href="{% url 'app:index' %}"><i class="fa fa-home"></i><span> Dashboard</span> </a>
+ </li>
+ <li class="{% active_link 'course:home' 'pk=course.pk' 'active' %}">
+    <a href="{% url 'course:home' pk=course.pk %}"><i class="fas fa-chalkboard-teacher"></i> <span> Home </span> </a>
+ </li>
+ <li>
+    <a href="{% url 'course:module' pk=course.pk %}"><i class="fa fa-book"></i> <span> Modules </span></a>
+ </li>
+ <li>
+    <a href="#"><i class="fa fa-question-circle"></i> <span> Quizzes </span></a>
+ </li>
+ <li>
+    <a href="#"><i class="fa fa-tasks"></i> <span> Assignments </span></a>
+ </li>
+ <li>
+    <a href="#"><i class="fa fa-marker"></i> <span> Grades </span></a>
+ </li>
+ <li>
+    <a href="#"><i class="fa fa-graduation-cap"></i> <span> Disscusions </span></a>
+ </li>
+ <li>
+   <a href="{% url 'course:people' pk=course.pk %}"><i class="fa fa-people-arrows"></i> <span> People </span></a>
+</li>

@@ -1,10 +1,13 @@
 {% load static %}
-
+{% load active_link_tags %}
 <div class="sidebar" id="sidebar">
     <div class="sidebar-inner slimscroll">
        <div id="sidebar-menu" class="sidebar-menu">
           <ul>
-            {% if user.user_type == '1' %} 
+            {% if course_mode %}
+               {% include 'course/sidebar.html' %}
+            
+            {% elif user.user_type == '1' %} 
                {% include 'includes/teacher_sidebar.html' %}
             {% elif user.user_type == '2' %}
                {% include 'includes/staff_sidebar.html' %}

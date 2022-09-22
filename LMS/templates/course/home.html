@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+
+{% if owner == True %}
+<div class="col-auto text-right float-right ml-auto">
+    <a href="{% url 'course:edit_syllabus' pk=course.pk %}" class="btn btn-primary"><i class="fas fa-pen"></i></a>
+ </div>
+{% endif %}
+
+{{course.syllabus | safe}}
+
+
+{% endblock %}

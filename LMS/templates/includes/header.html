@@ -27,7 +27,7 @@
             <i class="far fa-bell"></i> 
             {% with num=user.unread_inbox.count %}
                {% if num > 0 %}
-               <span class="badge badge-pill">{{num}}</span>
+               <span class="icon-button__badge">{{num}}</span>
                {% endif %}
             {% endwith %}
           </a>

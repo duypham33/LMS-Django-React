@@ -1,0 +1,78 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>{{feature}}</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Title</label>
+                        {{form.title}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Content</label>
+                        {{form.content}}
+                    </div>
+                </div>
+
+                {% if feature == 'Edit Page' %}
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label><i class="fas fa-trash mr-1"></i>Uploaded Files - Choose multiple options by 'alt' key</label>
+                        <select multiple class="form-control" name="trash">
+                            {% for f in form.instance.files.all %}
+                                <option value="{{f.id}}">{{f.get_file_name}}</option>
+                            {% endfor %}
+                            <option value="all" selected>Choose All</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+                <br>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <div class="btn">
+                            <span> {% if feature == 'New Page' %} Files {% else %} Add another files {% endif %}</span>
+                            {{ form.files }}
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            {% if form.instance.published == True %}
+                            <option value="published">Published</option>
+                            <option value="private">Private</option>
+                            {% else %}
+                            <option value="private">Private</option>
+                            <option value="published">Published</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+                
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

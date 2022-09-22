@@ -5,9 +5,10 @@ from django.http import HttpResponse
 def home(request):
     num_staffs = request.user.student.staffs.count()
     num_hosts = request.user.student.teachers.count()
-    num_courses = request.user.student.courses.count()
+    courses = request.user.student.courses
+    num_courses = courses.count()
     context = {'num_staffs': num_staffs, 
-               'num_hosts': num_hosts, 'num_courses': num_courses}
+               'num_hosts': num_hosts, 'num_courses': num_courses, 'courses': courses.all()}
 
     return render(request, 'student/home.html', context = context)
 

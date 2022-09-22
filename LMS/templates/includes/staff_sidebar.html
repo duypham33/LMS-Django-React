@@ -1,14 +1,14 @@
-
+{% load active_link_tags %}
 <li class="menu-title">
     <span>Main Menu</span>
  </li>
- <li class="submenu active">
-    <a href="{% url 'staff:staHome' %}"><i class="fas fa-user-graduate"></i> <span> Dashboard</span> </a>
+ <li class="{% active_link 'staff:staHome' 'active' %}">
+    <a href="{% url 'staff:staHome' %}"><i class="fas fa-home"></i> <span> Dashboard</span> </a>
  </li>
- <li>
+ <li class="{% active_link 'staff:view_professors' 'active' %}">
     <a href="{% url 'staff:view_professors' %}"><i class="fas fa-chalkboard-teacher"></i> <span> Professors </span> </a>
  </li>
- <li>
+ <li class="{% active_link 'staff:view_courses' 'active' %}">
     <a href="{% url 'staff:view_courses' %}"><i class="fa fa-graduation-cap"></i> <span> Courses </span></a>
  </li>
 
@@ -23,17 +23,17 @@
  <li>
    <a href="#"><i class="fa fa-poll-h"></i> <span>Add Result </span> </a>
  </li>
- <li>
+ <li class="{% active_link 'app:select_course_send_notice' 'active' %}">
    <a href="{% url 'app:select_course_send_notice' %}"><i class="fas fa-bell"></i> <span> Send Notification </span> </a>
  </li>
- <li>
+ <li class="{% active_link 'app:send_feedback' 'active' %} {% active_link 'app:view_feedbacks' 'active' %}">
    <a href="#"><i class="fas fa-comments"></i> <span> Feedback </span><span class="menu-arrow"></span> </a>
    <ul>
       <li><a href="{% url 'app:send_feedback' %}">Send Feedback</a></li>
       <li><a href="{% url 'app:view_feedbacks' %}"> Feedback History </a></li>
    </ul>
  </li>
- <li>
+ <li class="{% active_link 'app:apply_leave' 'active' %} {% active_link 'app:view_leaves' 'active' %}">
    <a href="#"><i class="fas fa-envelope"></i> <span> Apply For Leave</span> <span class="menu-arrow"></span> </a>
    <ul>
       <li><a href="{% url 'app:apply_leave' %}">New Request</a></li>

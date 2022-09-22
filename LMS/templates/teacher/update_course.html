@@ -5,7 +5,7 @@
     <div class="col-sm-12">
        <div class="card">
           <div class="card-body">
-             <form method="post">
+             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="col-12">
                     <h5 class="form-title"><span>Course</span></h5>
@@ -35,6 +35,14 @@
                         <input type="text" class="form-control" name="title" value="{{course.title}}">
                     </div>
                 </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Course Picture</label>
+                        <input type="file" class="form-control" name="pic">
+                    </div>
+                </div>
+                
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
                         <label>Session</label>

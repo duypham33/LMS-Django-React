@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import datetime, timezone
 from django.shortcuts import redirect
+from ckeditor.fields import RichTextField
 # Create your models here.
 
 class User(AbstractUser):
@@ -65,6 +66,9 @@ class Course(DateBase):
     coursenum = models.CharField(max_length=5)
     subject = models.ForeignKey(Subject, related_name='courses' ,
                              on_delete=models.SET_NULL, blank=True, null=True)
+    syllabus = RichTextField()
+    pic = models.ImageField(upload_to='media/course_pic', 
+                               default='media/course_pic/default.png')
     active = models.BooleanField(default=True)
     session = models.ForeignKey('Session_Year', related_name='courses' ,
                              on_delete=models.SET_NULL, blank=True, null=True)
@@ -167,9 +171,9 @@ class Notification(DateBase):
     def sendTo(self, receiver, showed_on_inbox='sent a notice from'):
         AssocUserNotice.objects.create(notice=self, receiver=receiver, showed_on_inbox=showed_on_inbox)
 
-    def senToList(self, receiver_list):
+    def senToList(self, receiver_list, showed_on_inbox='sent a notice from'):
         for u in receiver_list:
-            self.sendTo(u)
+            self.sendTo(u, showed_on_inbox)
 
 
 class Leave(models.Model):

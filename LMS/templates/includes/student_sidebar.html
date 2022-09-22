@@ -1,12 +1,12 @@
-
+{% load active_link_tags %}
 <li class="menu-title">
     <span>Main Menu</span>
  </li>
- <li class="submenu active">
-    <a href="{% url 'student:stuHome' %}"><i class="fas fa-user-graduate"></i> <span> Dashboard</span></a>
+ <li class="{% active_link 'student:stuHome' 'active' %}">
+    <a href="{% url 'student:stuHome' %}"><i class="fas fa-home"></i> <span> Dashboard</span></a>
  </li>
  
-<li>
+<li class="{% active_link 'student:view_courses' 'active' %}">
    <a href="{% url 'student:view_courses' %}"><i class="fa fa-graduation-cap"></i> <span> Courses </span></a>
 </li>
 
@@ -22,14 +22,14 @@
   <a href="#"><i class="fa fa-poll-h"></i> <span> Result </span> </a>
 </li>
 
-<li>
+<li class="{% active_link 'app:send_feedback' 'active' %} {% active_link 'app:view_feedbacks' 'active' %}">
   <a href="#"><i class="fas fa-comments"></i> <span> Feedback </span><span class="menu-arrow"></span> </a>
   <ul>
       <li><a href="{% url 'app:send_feedback' %}">Send Feedback</a></li>
       <li><a href="{% url 'app:view_feedbacks' %}"> Feedback History </a></li>
    </ul>
 </li>
-<li>
+<li class="{% active_link 'app:apply_leave' 'active' %} {% active_link 'app:view_leaves' 'active' %}">
    <a href="#"><i class="fas fa-envelope"></i> <span> Apply For Leave</span> <span class="menu-arrow"></span> </a>
    <ul>
       <li><a href="{% url 'app:apply_leave' %}">New Request</a></li>

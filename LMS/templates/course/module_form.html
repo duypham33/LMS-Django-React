@@ -1,0 +1,45 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>{{feature}}</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Title</label>
+                        {{form.title}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            {% if form.instance.published == True %}
+                            <option value="published">Published</option>
+                            <option value="private">Private</option>
+                            {% else %}
+                            <option value="private">Private</option>
+                            <option value="published">Published</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+                
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

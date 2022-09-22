@@ -1,0 +1,68 @@
+
+{% extends 'index.html' %}
+
+{% block content %}
+<div class="section">
+    <h4>{{ course.title }}</h4>
+    <div class="divider"></div>
+ </div>
+<div class="row">
+    <div class="col-xl-3 col-sm-6 col-12 d-flex">
+        <div class="card bg-one w-100">
+            <div class="card-body">
+                <div class="db-widgets d-flex justify-content-between align-items-center">
+                <div class="db-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="db-info">
+                    <h3>Instructor</h3>                                       
+                    <a href="#" class="avatar avatar-sm mr-2 float-right ml-auto"><img class="avatar-img rounded-circle" src="/{{course.instructor.user.avatar}}" alt="Teacher Image"></a>
+                    <h6>{{course.instructor.user.get_name}}</h6>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 col-12 d-flex">
+        <div class="card bg-one w-100">
+            <div class="card-body">
+                <div class="db-widgets d-flex justify-content-between align-items-center">
+                <div class="db-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="db-info">
+                    <h3>{{course.students.count}}</h3>
+                    <h6>Students</h6>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6 col-12 d-flex">
+        <div class="card bg-one w-100">
+            <div class="card-body">
+                <div class="db-widgets d-flex justify-content-between align-items-center">
+                <div class="db-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="db-info">
+                    <h3>{{course.staffs.count}}</h3>
+                    <h6>Staffs</h6>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% with students=course.students.all %}
+    {% include 'includes/_students.html' %}
+{% endwith %}
+
+{% with staffs=course.staffs.all %}
+    {% include 'includes/_staffs.html' %}
+{% endwith %}
+
+<br><br>
+
+{% endblock %}

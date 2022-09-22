@@ -11,9 +11,10 @@ from staff.models import Staff
 def home(request):
     num_students = request.user.teacher.students.count()
     num_staffs = request.user.teacher.staffs.count()
-    num_courses = request.user.teacher.courses.count()
+    courses = request.user.teacher.courses
+    num_courses = courses.count()
     context = {'num_students': num_students, 
-               'num_staffs': num_staffs, 'num_courses': num_courses}
+               'num_staffs': num_staffs, 'num_courses': num_courses, 'courses': courses.all()}
 
     return render(request, 'teacher/home.html', context = context)
 
@@ -61,6 +62,7 @@ def add_course(request):
         coursenum = request.POST.get('coursenum')
         subject_id = request.POST.get('subject')
         session_id = request.POST.get('session')
+        pic = request.FILES.get('pic', None)
         
         if title and title != '':
             try:
@@ -70,7 +72,7 @@ def add_course(request):
             except:
                 if coursenum and 0 < len(coursenum) < 6:
                     Course.objects.create(title = title, coursenum = coursenum, subject_id = subject_id,
-                    session_id = session_id, instructor = request.user.teacher)
+                    session_id = session_id, instructor = request.user.teacher, pic=pic)
                     messages.success(request, f'The course \'{title}\' is created!')
 
                     return redirect('teacher:add_course')
@@ -209,6 +211,7 @@ def update_course(request, pk):
         subj_id = request.POST.get('subject')
         coursenum = request.POST.get('coursenum')
         title = request.POST.get('title')
+        pic = request.FILES.get('pic', None)
         session_id = request.POST.get('session')
         staff_list = request.POST.getlist('staffs')
         
@@ -220,6 +223,9 @@ def update_course(request, pk):
             course.subject_id = subj_id
             course.coursenum = coursenum
             course.title = title
+            if pic:
+                course.pic = pic
+            
             course.session_id = session_id
             # Do staff
             request.user.teacher.edit_staffsOf_course(course, staff_list)

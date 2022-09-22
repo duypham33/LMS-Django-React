@@ -121,6 +121,8 @@ input[type=password] {
 textarea.form-control {
 	resize: vertical;
 }
+
+
 .navbar-nav > li {
 	float: left;
 }
