@@ -1,0 +1,124 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h5>{{quiz.cater}}</h5>
+   <h6>{{ quiz.title }}</h6>
+   <div class="divider"></div>
+
+    <div class="row">
+        <div class="col s4">
+            <h5>Due:</h5>
+            <p>{{ quiz.due_date }}</p>
+        </div>
+        <div class="col s4">
+            {% if quiz.num_attempts %}
+                <h5>Allowed Attempts:</h5>
+                <p>{{ quiz.num_attempts }}</p>
+            {% else %}
+                <h5>Unlimited Attempts</h5>
+            {% endif %}
+        </div>
+        <div class="col s4">
+            {% if quiz.time_limit %}
+                <h5>Time limit:</h5>
+                <p>{{ quiz.time_limit }}</p>
+            {% else %}
+                <h5>Unlimited Time</h5>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col s12">
+        {{ quiz.description | safe }}  
+    </div>
+    <div class="divider"></div>
+    <br> <br>
+    <div class="col s12">
+        <form method="post" action="#" role="form" class="col s12">
+            {% csrf_token %}
+            {% for question in quiz.questions.all %}
+            <div class="col s12">
+                <br>
+                <p>Question {{ question.num }}:</p>
+
+                {% if view_mode == True %}
+                <div class="col-auto text-right float-right ml-auto">
+                    <a href="{% url 'course:question_view' pk=question.pk %}" class="btn btn-primary"><i class="fas fa-pen"></i></a>
+                    <a href="#" class="btn btn-primary"><i class="fas fa-trash"></i></a>
+                </div>
+                {% endif %}
+                <p> {{ question.content | safe}} </p>
+                <input type="hidden" name="question" value="{{ question.id }}">
+            </div>
+
+            {% if question.cater == 'Typing Answer' %}
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <textarea class="form-control" name="text_ans_{{forloop.counter0}}" rows="10" cols="80"></textarea>
+                    </div>
+                </div>
+            {% else %}
+
+                {% if question.cater == 'One Choice' %}
+                    {% for answer in question.answers.all %}
+                    <div class="input col s12">
+                        <label>
+                            <input name="answer" type="radio" value="{{ answer.id }}" />
+                            <span>{{ answer.content | safe }}</span>
+
+                            {% if view_mode == True %}
+                            <span class="ml-3 text-muted"> {% if answer.is_correct == True %} Correct
+                                {% else %} Incorrect {% endif %}
+                            </span>
+                            {% endif %}
+                        </label>          
+                    </div>
+                    {% endfor %}
+
+                {% else %}
+                    {% for answer in question.answers.all %}
+                    <div class="input col s12">
+                        <label>
+                            <input name="answer" type="checkbox" value="{{ answer.id }}" />
+                            <span>{{ answer.content | safe }}</span>
+
+                            {% if view_mode == True %}
+                            <span class="ml-3 text-muted"> {% if answer.is_correct == True %} Correct
+                                {% else %} Incorrect {% endif %}
+                            </span>
+                            {% endif %}
+                        </label>          
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            
+            {% endif %}
+
+
+            <br><br>
+            {% endfor %}
+
+            
+            {% if view_mode == True %}
+                <div class="col s12">
+                    <a href="{% url 'course:quiz_detail' pk=quiz.pk %}" class="btn waves-effect waves-light">
+                    Back
+                    </a>
+                </div>
+            {% else %}
+                <div class="col s12">
+                    <button type="submit" class="btn waves-effect waves-light">
+                    Submit
+                    </button>
+                </div>
+            {% endif %}
+
+        </form>
+    </div>
+    
+</div>
+
+<br><br><br>
+{% endblock %}

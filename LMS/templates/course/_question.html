@@ -1,0 +1,54 @@
+
+<div class="col s12">
+    Question {{ q.num }}:  
+    <span class="ml-2"><a href="{% url 'course:edit_question' pk=q.pk %}"><i class="fas fa-pen"></i></a></span>
+    {{ q.content | safe }}  
+</div>
+
+
+
+{% if question.cater == 'Typing Answer' %}
+    <span class="ml-3"><a href="{% url 'course:edit_answer' pk=q.answers.first.pk %}"><i class="fas fa-pen"></i></a></span>
+    <div class="col-12 col-sm-6">
+        <div class="form-group">
+            {{ q.answers.first.content | safe }}  
+        </div>
+    </div>
+{% else %}
+
+    {% if q.cater == 'One Choice' %}
+        {% for answer in q.answers.all %}
+        <form method="post">
+            <div class="input col s12">
+                <label>
+                    <input name="answer" type="radio" value="{{ answer.id }}" disabled {% if answer.is_correct == True %} checked {% endif %} />
+                    <span>{{ answer.content | safe }}</span>
+    
+                    <span class="ml-3 text-muted"> {% if answer.is_correct == True %} Correct
+                        {% else %} Incorrect {% endif %}
+                    </span>
+                    <span class="ml-2"><a href="{% url 'course:edit_answer' pk=answer.pk %}"><i class="fas fa-pen"></i></a></span>
+                </label>          
+            </div>
+        </form>
+        {% endfor %}
+        
+    {% else %}
+        {% for answer in q.answers.all %}
+        <div class="input col s12">
+            <label>
+                <input name="answer" type="checkbox" value="{{ answer.id }}" disabled {% if answer.is_correct == True %} checked {% endif %} />
+                <span>{{ answer.content | safe }}</span>
+
+                <span class="ml-3 text-muted"> {% if answer.is_correct == True %} Correct
+                    {% else %} Incorrect {% endif %}
+                </span>
+                <span class="ml-2"><a href="{% url 'course:edit_answer' pk=answer.pk %}"><i class="fas fa-pen"></i></a></span>
+            </label>          
+        </div>
+        {% endfor %}
+    {% endif %}
+    
+    <span class="ml-3"><a href="{% url 'course:edit_addanswer' pk=q.pk %}"><i class="fas fa-plus"></i></a></span>
+
+{% endif %}

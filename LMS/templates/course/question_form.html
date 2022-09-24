@@ -1,0 +1,155 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>{{feature}}</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Question Number</label>
+                        {{form.num}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Category</label>
+                        {{form.cater}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Content</label>
+                        {{form.content}}
+                    </div>
+                </div>
+
+                
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Score</label>
+                        {{form.score}}
+                    </div>
+                </div>
+                
+                {% if not init_mode and form.instance.cater != 'Typing Answer' %}
+                <br>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Shuffle Answers per Attempt</label>
+                        <select class="form-control" name="shuffle_ans">
+                            {% if form.instance.shuffle_ans == True %}
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                            {% else %}
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if not init_mode %}
+                {% for a in form.instance.answers.all %}
+                    <div class="collection">
+                        <a href="#" class="collection-item">
+                            Answer {{loop.index}}: {{ a.content|safe }}
+                            {% if form.instance.cater != 'Typing Answer' %}
+                            <span class="ml-3 text-muted"> {% if a.is_correct == True %} Correct
+                                {% else %} Incorrect {% endif %}
+                            </span>
+                            {% endif %}
+                         </a>
+                    </div>
+                {% endfor %}
+                {% endif %}
+
+                {% if init_mode or form.instance.cater != 'Typing Answer' %}
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        {% if not init_mode and form.instance.cater != 'Typing Answer' %}
+                        <label>You can add multiple answers</label>
+                        {% endif %}
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#formModal">
+                            Add Answer
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="modal fade" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="formModalLabel">
+                                    <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{user.avatar}}" alt="User Image"></a>
+                                    <strong> {{user.get_name}} add new answer</strong> 
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            
+                            <div class="modal-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group">
+                                            <label>Content</label>
+                                            <textarea class="form-control" id="message-text" rows="10" cols="30" required name="a_content"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-sm-6">
+                                        <div class="form-group">
+                                            <label>Correct Answer?</label>
+                                            <select class="form-control" name="is_correct">
+                                                <option value="true">Yes</option>
+                                                <option value="false">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                
+                <br>
+                {% if not init_mode %}                             
+                <br>
+                <div class="col-12">
+                    <a class="btn btn-primary" href="{% url 'course:finish_quiz' pk=fst_version.quiz.pk %}">
+                        Finish the quiz
+                    </a>
+                    <a class="btn btn-primary" href="{% url 'course:new_ver' pk=fst_version.pk %}">
+                        Add different version
+                    </a>
+                    <a class="btn btn-primary" href="{% url 'course:init_question' pk=fst_version.quiz.pk %}">
+                        Create next question
+                    </a>
+                </div>
+                {% endif %}
+                <br><br>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+
+
+{% endblock %}

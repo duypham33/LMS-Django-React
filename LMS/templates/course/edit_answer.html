@@ -1,0 +1,51 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>{{feature}}</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Content</label>
+                        {{form.content | safe}}
+                    </div>
+                </div>
+                
+                {% if feature == 'New Answer' or form.instance.question.cater != 'Typing Answer' %}
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Correct Answer?</label>
+                        <select class="form-control" name="is_correct">
+                            {% if form.instance.is_correct == True %}
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                            {% else %}
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
+                <br><br>
+                <a href="{% url 'course:question_view' pk=fst_version.pk %}" class="btn waves-effect waves-light">
+                    Back
+                </a>
+
+                <button type="submit" class="btn btn-primary ml-3">Update</button>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+
+
+{% endblock %}

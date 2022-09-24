@@ -2,10 +2,11 @@ import re
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from app.models import Course, Notification
-from .forms import SyllabusForm, ModuleForm, PageForm
-from .models import Module, Page, PostFileContent
+from .forms import SyllabusForm, ModuleForm, PageForm, QuizForm, QuestionForm, AnswerForm
+from .models import Module, Page, PostFileContent, Quiz, Question, Answer
 from django.contrib import messages
 import os
+from datetime import datetime, timezone, timedelta
 # Create your views here.
 
 
@@ -208,3 +209,311 @@ def delete_page(request, pk):
 
     return redirect('course:module', pk=course.pk)
 
+
+#Quiz features
+@login_required(login_url='login/')
+def create_quiz(request, pk):
+    module = Module.objects.get(pk = pk)
+    course = module.course
+    
+    if request.method == 'POST':
+        form = QuizForm(request.POST)
+        if form.is_valid():
+            dueDate = form.cleaned_data.get('dueDate')
+            if dueDate == None or dueDate == '':
+                messages.warning(request, 'Due date is required!')
+                return redirect('course:create_quiz', pk=pk)
+            title = form.cleaned_data.get('title')
+            description = form.cleaned_data.get('description')
+            cater = form.cleaned_data.get('cater')
+            num_attempts = request.POST.get('num_attempts')
+            time_limit = request.POST.get('time_limit')
+            due_time = request.POST.get('due_time')
+            score = form.cleaned_data.get('score')
+            rule = form.cleaned_data.get('rule')
+            status = request.POST.get('status')
+            closed = request.POST.get('closed')
+
+            num_attempts = None if num_attempts == '' else num_attempts
+            time_limit = None if time_limit == '' else timedelta(days=0, seconds=int(60*int(time_limit)))
+            status = status == "published"
+            closed = closed == "close"
+
+            h, m = due_time.split(':')
+            due_time = datetime.strptime(f'{h}.{m}', "%H.%M").time()
+            due_date = datetime.combine(dueDate, due_time)
+            
+            q = Quiz.objects.create(module=module, title=title, description=description, cater=cater,
+            num_attempts=num_attempts, time_limit=time_limit, due_date=due_date, score=score,
+            rule=rule, published=status, closed=closed)
+
+            messages.success(request, 'New quiz is created! Let\'s create questions!')
+            return redirect('course:init_question', pk=q.pk)
+    else:
+        form = QuizForm()
+    
+    context = {'course_mode': True, 'course': course, 'feature': 'New Quiz', 'form': form}
+    return render(request, 'course/quiz_form.html', context = context)
+
+
+
+
+@login_required(login_url='login/')
+def init_question(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    course = quiz.module.course
+    
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        
+        if form.is_valid():
+            num = form.cleaned_data.get('num')
+            content = form.cleaned_data.get('content')
+            cater = form.cleaned_data.get('cater')
+            score = form.cleaned_data.get('score')
+            
+            a_content = request.POST.get('a_content')
+            is_correct = request.POST.get('is_correct') == 'true'
+
+            q = Question.objects.create(quiz=quiz, num=num, cater=cater, content=content, score=score)
+            Answer.objects.create(question=q, content=a_content, is_correct=is_correct)
+
+            messages.success(request, 'New answer is created!')
+            return redirect('course:create_answer', pk = q.pk)
+    else:
+        form = QuestionForm()
+    
+    context = {'course_mode': True, 'course': course, 'feature': 'New Question', 'form': form, 'init_mode': True}
+    return render(request, 'course/question_form.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def create_answer(request, pk):
+    question = Question.objects.get(pk = pk)
+    fst_version = question if question.is_1st_version == True else question.fst_version
+    course = fst_version.quiz.module.course
+    feature = 'New Answer' if question.is_1st_version == True else 'New Version'
+    
+    if request.method == 'POST':
+        form = QuestionForm(request.POST, instance=question)
+        
+        if form.is_valid():
+            question.num = form.cleaned_data.get('num')
+            question.content = form.cleaned_data.get('content')
+            question.cater = form.cleaned_data.get('cater')
+            question.score = form.cleaned_data.get('score')
+            question.shuffle_ans = request.POST.get('shuffle_ans') == 'true'
+
+            a_content = request.POST.get('a_content')
+            is_correct = request.POST.get('is_correct') == 'true'
+
+            Answer.objects.create(question=question, content=a_content, is_correct=is_correct)
+            question.save()
+
+            messages.success(request, 'New answer is created!')
+            
+    else:
+        form = QuestionForm(instance=question)
+    
+    context = {'course_mode': True, 'course': course, 'feature': feature, 
+    'form': form, 'fst_version': fst_version}
+    return render(request, 'course/question_form.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def diff_ver_question(request, pk):
+    fst_version = Question.objects.get(pk = pk)
+    course = fst_version.quiz.module.course
+    new_ver = Question.objects.create(num=fst_version.num, 
+            score = fst_version.score, is_1st_version=False, fst_version=fst_version)
+    return redirect('course:create_answer', pk = new_ver.pk)
+
+
+@login_required(login_url='login/')
+def finish_quiz(request, pk):
+    quiz = Quiz.objects.get(pk=pk)
+    messages.success(request, 'The quiz is created successfully!')
+    
+    return redirect('course:module', pk=quiz.module.course.pk)
+
+
+
+@login_required(login_url='login/')
+def quiz_detail(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    course = quiz.module.course
+    owner = course.instructor.user == request.user
+
+    context = {'course_mode': True, 'course': course, 'feature': quiz.cater, 'quiz': quiz, 'owner': owner}
+    return render(request, 'course/quiz.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def edit_quiz(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    course = quiz.module.course
+    due_time = quiz.due_date.time().strftime("%H:%M")
+    time_limit = None if not quiz.time_limit else quiz.time_limit.seconds//60
+
+    if request.method == 'POST':
+        form = QuizForm(request.POST, instance=quiz)
+        if form.is_valid():
+            quiz.title = form.cleaned_data.get('title')
+            quiz.description = form.cleaned_data.get('description')
+            quiz.cater = form.cleaned_data.get('cater')
+            num_attempts = request.POST.get('num_attempts')
+            time_limit = request.POST.get('time_limit')
+            dueDate = form.cleaned_data.get('dueDate')
+            due_time = request.POST.get('due_time')
+            quiz.score = form.cleaned_data.get('score')
+            quiz.rule = form.cleaned_data.get('rule')
+            status = request.POST.get('status')
+            closed = request.POST.get('closed')
+
+            quiz.num_attempts = None if num_attempts == '' else num_attempts
+            quiz.time_limit = None if time_limit == '' else timedelta(days=0, seconds=int(60*int(time_limit)))
+            quiz.published = status == "published"
+            quiz.closed = closed == "close"
+
+            h, m = due_time.split(':')
+            due_time = datetime.strptime(f'{h}.{m}', "%H.%M").time()
+            dueDate = quiz.due_date.date() if dueDate==None or dueDate=='' else dueDate
+            quiz.due_date = datetime.combine(dueDate, due_time)
+            
+            quiz.save()
+
+            messages.success(request, 'The quiz is updated generaly! Let\'s update questions in detail!')
+            return redirect('course:edit_quiz', pk=pk)
+    else:
+        form = QuizForm(instance=quiz)
+    
+    context = {'course_mode': True, 'course': course, 'feature': 'Edit Quiz', 
+    'form': form, 'due_time': due_time, 'time_limit': time_limit}
+    return render(request, 'course/quiz_form.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def view_quiz_content(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    course = quiz.module.course
+    owner = course.instructor.user == request.user
+
+    # if request.method == 'POST':
+    #     #t_form = TextAnswerForm(request.POST)
+
+    # else:
+    #     #t_form = TextAnswerForm()
+
+    context = {'course_mode': True, 'course': course, 'quiz': quiz, 'owner': owner, 'view_mode': True}
+    return render(request, 'course/quiz_content.html', context = context)
+
+
+
+
+
+@login_required(login_url='login/')
+def question_view(request, pk):
+    question = Question.objects.get(pk = pk)
+    course = question.quiz.module.course
+    feature = 'Edit Question'
+    
+    context = {'course_mode': True, 'course': course, 'feature': feature, 'question': question}
+    return render(request, 'course/question_view.html', context = context)
+
+
+@login_required(login_url='login/')
+def edit_question(request, pk):
+    question = Question.objects.get(pk = pk)
+    fst_version = question if question.is_1st_version == True else question.fst_version
+    course = fst_version.quiz.module.course
+    feature = 'Edit Question'
+
+    if request.method == 'POST':
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            question.num = form.cleaned_data.get('num')
+            question.content = form.cleaned_data.get('content')
+            question.cater = form.cleaned_data.get('cater')
+            question.score = form.cleaned_data.get('score')
+            question.shuffle_ans = request.POST.get('shuffle_ans') == 'true'
+            apply_ver = request.POST.get('apply_ver') == 'yes'
+            
+            if apply_ver == True:
+                fst_version.cater = form.cleaned_data.get('cater')
+                fst_version.score = form.cleaned_data.get('score')
+                fst_version.save()
+
+                for ver in fst_version.versions.all():
+                    ver.cater = form.cleaned_data.get('cater')
+                    ver.score = form.cleaned_data.get('score')
+                    ver.save()
+          
+            question.save()
+            messages.success(request, 'The question is updated!')
+            return redirect('course:question_view', pk = fst_version.pk)
+
+    else:
+        form = QuestionForm(instance=question)
+    
+    context = {'course_mode': True, 'course': course, 'feature': feature, 
+    'question': question, 'form': form, 'fst_version': fst_version}
+    return render(request, 'course/edit_question.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def edit_answer(request, pk):
+    ans = Answer.objects.get(pk = pk)
+    question = ans.question
+    fst_version = question if question.is_1st_version == True else question.fst_version
+    course = fst_version.quiz.module.course
+    feature = 'Edit Answer'
+
+    if request.method == 'POST':
+        form = AnswerForm(request.POST, instance=ans)
+        if form.is_valid():
+            ans.content = form.cleaned_data.get('content')
+            is_correct = request.POST.get('is_correct')
+            if is_correct and is_correct != '':
+                ans.is_correct = is_correct == "true"
+            
+                ans.save()
+                messages.success(request, 'The answer is updated!')
+                return redirect('course:question_view', pk = fst_version.pk)
+    else:
+        form = AnswerForm(instance=ans)
+
+    
+    context = {'course_mode': True, 'course': course, 'feature': feature, 
+    'form': form, 'fst_version': fst_version}
+    return render(request, 'course/edit_answer.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def edit_addanswer(request, pk):
+    question = Question.objects.get(pk = pk)
+    fst_version = question if question.is_1st_version == True else question.fst_version
+    course = fst_version.quiz.module.course
+    feature = 'New Answer'
+
+    if request.method == 'POST':
+        form = AnswerForm(request.POST)
+        if form.is_valid():
+            content = request.cleaned_data.get('content')
+            is_correct = request.POST.get('is_correct') == 'true'
+
+            Answer.objects.create(question=question, content=content, is_correct=is_correct)
+
+            messages.success(request, 'New answer is created!')
+            return redirect('course:question_view', pk = fst_version.pk)
+    else:
+        form = AnswerForm()
+
+    context = {'course_mode': True, 'course': course, 
+    'feature': feature, 'form': form, 'fst_version': fst_version}
+    return render(request, 'course/edit_answer.html', context = context)

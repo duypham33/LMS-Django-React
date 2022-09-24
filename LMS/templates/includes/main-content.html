@@ -106,7 +106,12 @@
                </div>
                <div class="card-footer">
                   <a href="#" class="icon-button">
-                     <i class="far fa-bell"></i> <span class="icon-button__badge2">30</span>
+                     {% with count=user.unread_c_inbox theCourse=c  %}
+                        <i class="far fa-bell"></i> 
+                        {% if count > 0 %}
+                           <span class="icon-button__badge2">{{count}}</span>
+                        {% endif %}
+                     {% endwith %}
                    </a>
                </div>
             </div>

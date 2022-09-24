@@ -1,0 +1,61 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="section">
+   {% if owner == True %}
+    <div class="col-auto text-right float-right ml-auto">
+        <a href="{% url 'course:edit_quiz' pk=quiz.pk %}" class="btn btn-primary"><i class="fas fa-pen"></i></a>
+        <a href="#" class="btn btn-primary"><i class="fas fa-trash"></i></a>
+    </div>
+    {% endif %}
+
+    <h5>{{ quiz.cater }}</h5>
+    <h4>{{ quiz.title }}</h4>
+   <div class="divider"></div>
+
+    {% if owner == True or quiz.closed == False %}
+    <div class="col s12 mt-3 mb-3">
+        {{ quiz.description | safe }}
+        <div class="divider"></div>
+    </div>
+    {% else %}
+    <div class="col s12 mt-3 mb-3">
+        Availability: Closed
+        <div class="divider mt-3"></div>
+    </div>
+    {% endif %}
+
+    <div class="col s12 h6 text-muted mt-3">
+        {% if quiz.time_limit %}
+        Time limit: {{quiz.time_limit}} per attempt
+        {% else %}
+        No Time Limit
+        {% endif %}
+
+        <span class="ml-5"> <strong>Due </strong>{{quiz.due_date.date}} at {{quiz.due_date.time}} </span>
+    </div>
+    <div class="col s12 h5 mt-2">
+        {% if quiz.num_attempts == 1 %}
+            Only one attempt allowed!
+        {% elif quiz.num_attempts > 1 %}
+            Allowed {{quiz.num_attempts}} attempts taken. This will be your attempt!
+        {% else %}
+            This assessment has unlimited attempts.
+        {% endif %}
+    </div>
+
+    {% if owner == True or quiz.closed == False %}
+    <a class="btn btn-primary mt-4 mr-3" href="#">
+        Begin
+    </a>
+    {% if owner == True %}
+    <a class="btn btn-primary mt-4" href="{% url 'course:view_quiz_content' pk=quiz.pk %}">
+        View Quiz
+    </a>
+    {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -18,4 +18,18 @@ urlpatterns = [
     path("page/<int:pk>/", views.page, name="page"),
     path("page/<int:pk>/edit", views.edit_page, name="edit_page"),
     path("page/<int:pk>/delete", views.delete_page, name="delete_page"),
+
+    path("module/<int:pk>/quiz/new", views.create_quiz, name="create_quiz"),
+    path("quiz/<int:pk>/question/new", views.init_question, name="init_question"),
+    path("question/<int:pk>/new", views.create_answer, name="create_answer"),
+    path("question/<int:pk>/new_version", views.diff_ver_question, name="new_ver"),
+    path('quiz/<int:pk>/created/', views.finish_quiz, name='finish_quiz'),
+    path('quiz/<int:pk>/', views.quiz_detail, name='quiz_detail'),
+    path('quiz/<int:pk>/edit', views.edit_quiz, name='edit_quiz'),
+    path('quiz/<int:pk>/view', views.view_quiz_content, name='view_quiz_content'),
+    path('question/<int:pk>/view', views.question_view, name='question_view'),
+    path('question/<int:pk>/edit', views.edit_question, name='edit_question'),
+
+    path('answer/<int:pk>/edit', views.edit_answer, name='edit_answer'),
+    path('answer/<int:pk>/add', views.edit_addanswer, name='edit_addanswer'),
 ]

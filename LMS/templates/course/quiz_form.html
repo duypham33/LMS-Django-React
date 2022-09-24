@@ -1,0 +1,155 @@
+{% extends 'index.html' %}
+
+{% block content %} 
+<div class="row">
+    <div class="col-sm-12">
+       <div class="card">
+          <div class="card-body">
+            {% if feature == 'Edit Quiz' %}
+            <div class="col-auto text-right float-right ml-auto">
+                {% if form.instance.questions.count > 0 %}
+                <a href="#" class="btn btn-primary">
+                    Edit questions
+                </a>
+                {% else %}
+                <a href="{% url 'course:init_question' pk=form.instance.pk %}" class="btn btn-primary">
+                    No questions yet, Create
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+             <form method="post">
+                {% csrf_token %}
+                <div class="col-12">
+                    <h5 class="form-title"><span>{{feature}}</span></h5>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Title</label>
+                        {{form.title}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Description</label>
+                        {{form.description}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Category</label>
+                        {{form.cater}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Number of Attempts (Skip if not limit)</label>
+                        {% if feature != 'Edit Quiz' or not form.instance.num_attempts %}
+                        <input type="text" name="num_attempts" placeholder="Not limit">
+                        {% else %}
+                        <input type="text" name="num_attempts" value="{{form.instance.num_attempts}}">
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Time limit in min per attempt (Skip if not limit) </label>
+                        {% if feature != 'Edit Quiz' %}
+                        <input type="text" name="time_limit" placeholder="In minute">
+                        {% elif not form.instance.time_limit %}
+                        <input type="text" name="time_limit" placeholder="Not limit (In minute)">
+                        {% else %}
+                        <input type="text" name="time_limit" value="{{time_limit}}">
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Due date</label>
+                        {% if feature == 'Edit Quiz' %}
+                        <input type="text" value="Current: {{form.instance.due_date.date}}" readonly>
+                        <label>New due date?</label>
+                        {% endif %}
+
+                        {{form.dueDate}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Due by time</label>
+                        <input type="time" name="due_time" required value="{{due_time}}">
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Maximum Score</label>
+                        {{form.score}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>If with multiple attempts, Final Score by: </label>
+                        {{form.rule}}
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" name="status">
+                            {% if form.instance.published == True %}
+                            <option value="published">Published</option>
+                            <option value="private">Private</option>
+                            {% else %}
+                            <option value="private">Private</option>
+                            <option value="published">Published</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+
+
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Open Now?</label>
+                        <select class="form-control" name="closed">
+                            {% if form.instance.closed == True %}
+                            <option value="close">Close</option>
+                            <option value="open">Open</option>
+                            {% else %}
+                            <option value="open">Open</option>
+                            <option value="close">Close</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+                               
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        {% if feature == 'Edit Quiz' %}
+                        Update
+                        {% else %}
+                        Create
+                        {% endif %}
+                    </button>
+                </div>
+             </form>
+          </div>
+       </div>
+    </div>
+ </div>
+
+{% endblock %}

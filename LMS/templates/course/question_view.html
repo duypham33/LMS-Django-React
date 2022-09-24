@@ -1,0 +1,35 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h5>{{feature}}</h5>
+   <div class="divider"></div>
+
+    {% with q=question %}
+        {% include 'course/_question.html' %}
+    {% endwith %}
+            
+    {% if question.versions.count > 0 %}
+        <div class="divider"></div>
+        <h6>Different Versions: </h6>
+        <br>
+    {% endif %}
+
+    {% for ver in question.versions.all %}
+        {% with q=ver %}
+            {% include 'course/_question.html' %}
+        {% endwith %}
+        <br><br>
+    {% endfor %}
+
+    <div class="col s12 mt-5">
+        <a href="{% url 'course:view_quiz_content' pk=question.quiz.pk %}" class="btn waves-effect waves-light">
+        Back
+        </a>
+    </div>
+    
+</div>
+
+<br><br><br>
+{% endblock %}

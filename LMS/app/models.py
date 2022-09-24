@@ -41,6 +41,15 @@ class User(AbstractUser):
     def unread_inbox(self):
         return self.notice_assoc.filter(read = False).all()
 
+    def unread_c_inbox(self, theCourse):
+        num = 0
+        qur = self.notice_assoc.filter(read = False)
+        num += qur.filter(notice__from_course = theCourse).count()
+        num += qur.filter(leave_request__from_course = theCourse).count()
+        num += qur.filter(feedback__from_course = theCourse).count()
+
+        return num
+
 
 class DateBase(models.Model):
     date_created = models.DateTimeField(auto_now_add = True)

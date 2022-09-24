@@ -40,7 +40,7 @@
                <div class="collapsible-body">
                   {% if owner == True %}
                   <a href="{% url 'course:add_page' pk=module.pk %}" class="btn-small">New page</a>
-                  <a href="#" class="btn-small">New quiz</a>
+                  <a href="{% url 'course:create_quiz' pk=module.pk %}" class="btn-small">New quiz</a>
                   <a href="#" class="btn-small">New assignment</a>
                   {% endif %}
 
@@ -50,7 +50,7 @@
                      {% for page in module.pages.all %}
                         {% if page.published == True or owner == True %}
                            <a href="{% url 'course:page' pk=page.pk %}" class="collection-item">
-                              <i class="fa fa-pagelines"></i> {{ page.title }}
+                              <i class="fa fa-book-reader mr-2"></i> {{ page.title }}
                               {% if owner == True and page.published == False %}
                                  <span class="ml-3 text-muted"> Private </span>
                               {% endif %}
@@ -58,8 +58,27 @@
                         {% endif %}
 
                      {% endfor %}
+
+                     {% for quiz in module.quizzes.all %}
+                        {% if quiz.published == True or owner == True %}
+                           <a href="{% url 'course:quiz_detail' pk=quiz.pk %}" class="collection-item">
+                              <i class="fa fa-rocket mr-2"></i> {{ quiz.title }}
+                              {% if owner == True and quiz.published == False %}
+                                 <span class="ml-3 text-muted"> Private </span>
+                              {% endif %}
+                              
+                              <p class="text-muted">
+                                 {{quiz.cater}}
+                                 |{% if quiz.closed == True %} Closed {% else %} Opened {% endif %}
+                                 | Due {{quiz.due_date.date}} at {{quiz.due_date.time}}
+                                 | {{quiz.score}} pts
+                              </p>
+                           </a>
+                        {% endif %}
+
+                     {% endfor %}
                      <!-- {% for quiz in module.quizzes.all %}
-                     <a href="{% url 'quiz-detail' course.id module.id quiz.id %}" class="collection-item">
+                     <a href="{#}" class="collection-item">
                         <i class="material-icons">fact_check</i> {{ quiz.title }}
                         <div class="secondary-content">
                            Completed: 
@@ -68,7 +87,7 @@
                      </a>
                      {% endfor %}
                      {% for assignment in module.assignments.all %}
-                     <a href="{% url 'assignment-detail' course.id module.id assignment.id %}" class="collection-item">
+                     <a href="{#}" class="collection-item">
                         <i class="material-icons">fact_check</i> {{ assignment.title }}
                         <div class="secondary-content">
                            Completed: 
