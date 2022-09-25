@@ -7,7 +7,7 @@
    {% if owner == True %}
     <div class="col-auto text-right float-right ml-auto">
         <a href="{% url 'course:edit_quiz' pk=quiz.pk %}" class="btn btn-primary"><i class="fas fa-pen"></i></a>
-        <a href="#" class="btn btn-primary"><i class="fas fa-trash"></i></a>
+        <a href="{% url 'course:delete_quiz' pk=quiz.pk %}" class="btn btn-primary"><i class="fas fa-trash"></i></a>
     </div>
     {% endif %}
 
@@ -47,7 +47,7 @@
     </div>
 
     {% if owner == True or quiz.closed == False %}
-    <a class="btn btn-primary mt-4 mr-3" href="#">
+    <a class="btn btn-primary mt-4 mr-3" href="{% url 'course:take_quiz' pk=quiz.pk %}">
         Begin
     </a>
     {% if owner == True %}

@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from app.models import Course, Notification
 from .forms import SyllabusForm, ModuleForm, PageForm, QuizForm, QuestionForm, AnswerForm
-from .models import Module, Page, PostFileContent, Quiz, Question, Answer
+from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt
 from django.contrib import messages
 import os
 from datetime import datetime, timezone, timedelta
@@ -326,7 +326,7 @@ def create_answer(request, pk):
 def diff_ver_question(request, pk):
     fst_version = Question.objects.get(pk = pk)
     course = fst_version.quiz.module.course
-    new_ver = Question.objects.create(num=fst_version.num, 
+    new_ver = Question.objects.create(num=fst_version.num, cater=fst_version.cater,
             score = fst_version.score, is_1st_version=False, fst_version=fst_version)
     return redirect('course:create_answer', pk = new_ver.pk)
 
@@ -401,14 +401,10 @@ def view_quiz_content(request, pk):
     quiz = Quiz.objects.get(pk = pk)
     course = quiz.module.course
     owner = course.instructor.user == request.user
+    questions = quiz.questions.all()
 
-    # if request.method == 'POST':
-    #     #t_form = TextAnswerForm(request.POST)
-
-    # else:
-    #     #t_form = TextAnswerForm()
-
-    context = {'course_mode': True, 'course': course, 'quiz': quiz, 'owner': owner, 'view_mode': True}
+    context = {'course_mode': True, 'course': course, 'quiz': quiz, 
+    'owner': owner, 'view_mode': True, 'questions': questions}
     return render(request, 'course/quiz_content.html', context = context)
 
 
@@ -443,11 +439,13 @@ def edit_question(request, pk):
             apply_ver = request.POST.get('apply_ver') == 'yes'
             
             if apply_ver == True:
+                fst_version.num = form.cleaned_data.get('num')
                 fst_version.cater = form.cleaned_data.get('cater')
                 fst_version.score = form.cleaned_data.get('score')
                 fst_version.save()
 
                 for ver in fst_version.versions.all():
+                    ver.num = form.cleaned_data.get('num')
                     ver.cater = form.cleaned_data.get('cater')
                     ver.score = form.cleaned_data.get('score')
                     ver.save()
@@ -504,7 +502,7 @@ def edit_addanswer(request, pk):
     if request.method == 'POST':
         form = AnswerForm(request.POST)
         if form.is_valid():
-            content = request.cleaned_data.get('content')
+            content = form.cleaned_data.get('content')
             is_correct = request.POST.get('is_correct') == 'true'
 
             Answer.objects.create(question=question, content=content, is_correct=is_correct)
@@ -517,3 +515,116 @@ def edit_addanswer(request, pk):
     context = {'course_mode': True, 'course': course, 
     'feature': feature, 'form': form, 'fst_version': fst_version}
     return render(request, 'course/edit_answer.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def delete_answer(request, pk):
+    ans = Answer.objects.get(pk = pk)
+    question = ans.question
+    fst_version = question if question.is_1st_version == True else question.fst_version
+
+    ans.delete()
+    messages.success(request, 'The answer is deleted!')
+    return redirect('course:question_view', pk = fst_version.pk)
+
+
+@login_required(login_url='login/')
+def delete_qux_local(request, pk):
+    if request.method == "POST":
+        question = Question.objects.get(pk = pk)
+        
+        if question.is_1st_version == True and question.versions.count() > 0:
+            next_ver = question.versions.first()
+            next_ver.num = question.num
+            next_ver.quiz = question.quiz
+            next_ver.is_1st_version = True
+            next_ver.fst_version = None
+            next_ver.save()
+
+            for ver in question.versions.all():
+                ver.fst_version = next_ver
+                ver.save()
+            fst_version = next_ver
+
+        elif question.is_1st_version == True and question.versions.count() == 0:
+            q_pk = question.quiz.pk
+            question.delete()
+            messages.success(request, 'The question is deleted!')
+            return redirect('course:view_quiz_content', pk = q_pk)
+        else:
+            fst_version = question.fst_version
+            
+        question.delete()
+        messages.success(request, 'The question is deleted!')
+        return redirect('course:question_view', pk = fst_version.pk)
+
+    return redirect('app:index')
+
+
+
+
+@login_required(login_url='login/')
+def delete_qux_global(request, pk):
+    if request.method == "POST":
+        question = Question.objects.get(pk = pk)
+        q_pk = question.quiz.pk
+        question.delete()
+
+        messages.success(request, 'The question is deleted!')
+        return redirect('course:view_quiz_content', pk = q_pk)
+
+    return redirect('app:index')
+
+
+
+
+@login_required(login_url='login/')
+def delete_quiz(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    m_pk = quiz.module.course.pk
+
+    messages.success(request, f'The {quiz.cater} - {quiz.title} is removed!')
+    quiz.delete()
+    return redirect('course:module', pk = m_pk)
+
+
+
+@login_required(login_url='login/')
+def take_quiz(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    course = quiz.module.course
+
+    latest_attempt = quiz.latest_attempt(request.user)
+    if latest_attempt == None or latest_attempt.status == 'Completed':
+        num = 1 if latest_attempt == None else (latest_attempt.num + 1)
+        cur_attempt = Attempt.objects.create(user = request.user, quiz = quiz, num = num)
+        questions = quiz.generate_question_ver()
+    else:
+        cur_attempt = latest_attempt
+        questions = quiz.questions.all()
+    
+    context = {'course_mode': True, 'course': course, 'quiz': quiz, 'questions': questions}
+
+    if request.method == 'POST':
+        method = request.POST.get("method")
+        if method == 'submit':
+            cur_attempt.completed_time = datetime.now(timezone.utc)
+            cur_attempt.status = 'Completed'
+            cur_attempt.save()
+
+        questions = request.POST.getlist('question')
+        qs = [Question.objects.get(id = id) for id in questions]
+        
+        for q in qs:
+            if q.cater == 'Typing Answer':
+                print(q.num + ':  ' + request.POST.get(f'text_ans_{q.id}'))
+            else:
+                ans = request.POST.getlist(f'answer_{q.id}')
+                print(f'{q.num}: {[Answer.objects.get(id = id).content for id in ans]}')
+
+        print(method, method=='return', method=='submit')
+
+
+
+    return render(request, 'course/quiz_content.html', context = context)

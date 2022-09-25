@@ -1,7 +1,9 @@
 
 <div class="col s12">
     Question {{ q.num }}:  
-    <span class="ml-2"><a href="{% url 'course:edit_question' pk=q.pk %}"><i class="fas fa-pen"></i></a></span>
+    <span class="ml-2 mr-2"><a href="{% url 'course:edit_question' pk=q.pk %}"><i class="fas fa-pen"></i></a></span>
+    <a href="#" data-toggle="modal" data-target="#formModal-{{q.pk}}"><i class="fas fa-trash"></i></a></span>
+    
     {{ q.content | safe }}  
 </div>
 
@@ -28,6 +30,7 @@
                         {% else %} Incorrect {% endif %}
                     </span>
                     <span class="ml-2"><a href="{% url 'course:edit_answer' pk=answer.pk %}"><i class="fas fa-pen"></i></a></span>
+                    <span class="ml-2"><a href="{% url 'course:delete_answer' pk=answer.pk %}"><i class="fas fa-trash"></i></a></span>
                 </label>          
             </div>
         </form>
@@ -44,6 +47,7 @@
                     {% else %} Incorrect {% endif %}
                 </span>
                 <span class="ml-2"><a href="{% url 'course:edit_answer' pk=answer.pk %}"><i class="fas fa-pen"></i></a></span>
+                <span class="ml-2"><a href="{% url 'course:delete_answer' pk=answer.pk %}"><i class="fas fa-trash"></i></a></span>
             </label>          
         </div>
         {% endfor %}
@@ -52,3 +56,41 @@
     <span class="ml-3"><a href="{% url 'course:edit_addanswer' pk=q.pk %}"><i class="fas fa-plus"></i></a></span>
 
 {% endif %}
+
+
+
+
+<div class="modal fade" id="formModal-{{q.pk}}" tabindex="-1" role="dialog" aria-labelledby="formModalLabel-{{q.pk}}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formModalLabel-{{q.pk}}">
+                    <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{user.avatar}}" alt="User Image"></a>
+                    <strong> {{user.get_name}}</strong> , Are you sure to delete this question?
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <form method="post" action="{% url 'course:delete_qux_local' pk=q.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="col-12 col-sm-12">
+                        {% if q.is_1st_version == True and q.versions.count > 0 %}
+                            <p> This is the original version of the question {{q.num}}! 
+                                If you remove it, the next version will be the original!
+                            </p> 
+                        {% elif q.is_1st_version == False %}
+                            <p> This is a version of the question {{q.fst_version.num}}!</p> 
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary ml-3">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

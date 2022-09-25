@@ -1,9 +1,9 @@
-from email.policy import default
-from sre_constants import BRANCH
+
 from django.db import models
 from app.models import Course, User
 import os
 from ckeditor.fields import RichTextField
+import random
 # Create your models here.
 
 class Base(models.Model):
@@ -70,8 +70,24 @@ class Quiz(Base):
 
     def __str__(self):
         return self.title
-    
 
+    def latest_attempt(self, user):
+        at = self.attempts.filter(user = user)
+        return None if at.count() == 0 else at.last()
+
+    def generate_question_ver(self):
+        question_list = []
+        for q in self.questions.all():
+            count = q.versions.count()
+            r = random.randint(-1, count - 1)
+            if r == -1:
+                question_list.append(q)
+            else:
+                question_list.append(q.versions.all()[r])
+
+        return question_list
+
+    
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, related_name='questions', on_delete=models.CASCADE,
@@ -97,6 +113,15 @@ class Question(models.Model):
 
     class Meta:
         ordering = ['num']
+
+    def shuffle_answers(self):
+        count = self.answers.count()
+        if self.shuffle_ans == True:
+            ans_index = random.sample(range(count), count)
+            answers = [self.answers.all()[i] for i in ans_index]
+            return zip(answers, ans_index)
+        
+        return zip(self.answers.all(), list(range(count)))
 
 
 class Answer(models.Model):
@@ -124,6 +149,9 @@ class Attempt(Base):
 
     def __str__(self):
         return f'Attempt-{self.id} of user-{self.user.username}'
+
+    class Meta:
+        ordering = ['num']
     
 
 class SubAttempt(models.Model):

@@ -72,7 +72,7 @@
                 {% endfor %}
                 {% endif %}
 
-                {% if init_mode or form.instance.cater != 'Typing Answer' %}
+                {% if init_mode or form.instance.cater != 'Typing Answer' or form.instance.answers.count == 0 %}
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
                         {% if not init_mode and form.instance.cater != 'Typing Answer' %}
@@ -121,7 +121,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Add</button>
+                                <button type="submit" class="btn btn-primary ml-3">Add</button>
                             </div>
 
                         </div>
