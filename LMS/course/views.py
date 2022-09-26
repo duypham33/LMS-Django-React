@@ -598,13 +598,15 @@ def take_quiz(request, pk):
     latest_attempt = quiz.latest_attempt(request.user)
     if latest_attempt == None or latest_attempt.status == 'Completed':
         num = 1 if latest_attempt == None else (latest_attempt.num + 1)
-        cur_attempt = Attempt.objects.create(user = request.user, quiz = quiz, num = num)
+        Attempt.objects.create(user = request.user, quiz = quiz, num = num)
         questions = quiz.generate_question_ver()
+        is_saved_attempt = False
+        
     else:
         cur_attempt = latest_attempt
-        questions = quiz.questions.all()
-    
-    context = {'course_mode': True, 'course': course, 'quiz': quiz, 'questions': questions}
+        questions = cur_attempt.get_questions()
+        is_saved_attempt = True
+        
 
     if request.method == 'POST':
         method = request.POST.get("method")
@@ -613,18 +615,64 @@ def take_quiz(request, pk):
             cur_attempt.status = 'Completed'
             cur_attempt.save()
 
-        questions = request.POST.getlist('question')
-        qs = [Question.objects.get(id = id) for id in questions]
+        if cur_attempt.questions.count() == 0:
+            questions_id = request.POST.getlist('question')
+            questions = [Question.objects.get(id = id ) for id in questions_id]
+
+            for q in questions:
+                if q.cater == 'Typing Answer':
+                    SubAttempt.objects.create(attempt = cur_attempt, question = q, 
+                               ans_text = request.POST.get(f'text_ans_{q.id}'))
+                    
+                else:
+                    ansIndex = request.POST.getlist(f'ansIndex_{q.id}')
+                    s = SubAttempt.objects.create(attempt = cur_attempt, question = q,
+                                              showed_shuffle_ansIndex = ','.join(ansIndex))
+
+                    answers_id = request.POST.getlist(f'answer_{q.id}')
+                    answers = [Answer.objects.get(id = id) for id in answers_id]
+                    if answers and answers != []:
+                        s.chosen_answers.set(answers)
         
-        for q in qs:
-            if q.cater == 'Typing Answer':
-                print(q.num + ':  ' + request.POST.get(f'text_ans_{q.id}'))
-            else:
-                ans = request.POST.getlist(f'answer_{q.id}')
-                print(f'{q.num}: {[Answer.objects.get(id = id).content for id in ans]}')
+        else:
+            for sub_attempt in cur_attempt.questions.all():
+                if sub_attempt.question.cater == 'Typing Answer':
+                    sub_attempt.ans_text = request.POST.get(f'text_ans_{sub_attempt.id}')
+                else:
+                    answers_id = request.POST.getlist(f'answer_{sub_attempt.id}')
+                    answers = [Answer.objects.get(id = id) for id in answers_id]
+                    sub_attempt.chosen_answers.set(answers, clear = True)
+                sub_attempt.save()
+                    
+                
+        msg = f'Your {quiz.cater} is submited successfully!' if method=='submit' else 'Your attempt is saved!'
+        messages.success(request, msg)
+        return redirect('course:quiz_detail', pk = pk)
 
-        print(method, method=='return', method=='submit')
+    if is_saved_attempt == True:
+        context = {'course_mode': True, 'course': course, 'quiz': quiz, 
+        'questions': questions, 'cur_attempt': cur_attempt}
+        return render(request, 'course/resume_quiz.html', context = context)
 
-
-
+    context = {'course_mode': True, 'course': course, 'quiz': quiz, 'questions': questions}
     return render(request, 'course/quiz_content.html', context = context)
+
+
+
+
+@login_required(login_url='login/')
+def view_attempt(request, pk, num):
+    quiz = Quiz.objects.get(pk = pk)
+    cur_attempt = quiz.attempts.filter(user = request.user, num = num).first()
+    if cur_attempt.score == None:
+        cur_attempt.calculate_score()
+
+    course = quiz.module.course
+    questions = cur_attempt.get_questions()
+    
+    order = ['', 'st', 'nd', 'rd', 'th']
+    num = str(num) + order[min(num,4)]
+
+    context = {'course_mode': True, 'course': course, 'quiz': quiz, 
+        'questions': questions, 'cur_attempt': cur_attempt, 'num': num, 'review_mode': True}
+    return render(request, 'course/resume_quiz.html', context = context)

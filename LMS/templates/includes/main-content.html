@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load custom_tags %}
  <div class="page-header">
    <div class="row">
       <div class="col-sm-12">
@@ -106,7 +106,7 @@
                </div>
                <div class="card-footer">
                   <a href="#" class="icon-button">
-                     {% with count=user.unread_c_inbox theCourse=c  %}
+                     {% with count=user|unread_of_course:c  %}
                         <i class="far fa-bell"></i> 
                         {% if count > 0 %}
                            <span class="icon-button__badge2">{{count}}</span>

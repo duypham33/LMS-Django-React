@@ -4,6 +4,7 @@ from app.models import Course, User
 import os
 from ckeditor.fields import RichTextField
 import random
+from datetime import timedelta
 # Create your models here.
 
 class Base(models.Model):
@@ -74,6 +75,16 @@ class Quiz(Base):
     def latest_attempt(self, user):
         at = self.attempts.filter(user = user)
         return None if at.count() == 0 else at.last()
+
+    def num_attempts_completed(self, user):
+        qur = self.attempts.filter(user = user)
+        if qur.count() == 0:
+            return 0
+        elif qur.last().status == 'In Progress':
+            return qur.count() - 1
+        else:
+            return qur.count()
+        
 
     def generate_question_ver(self):
         question_list = []
@@ -152,12 +163,33 @@ class Attempt(Base):
 
     class Meta:
         ordering = ['num']
+
+    def get_questions(self):
+        questions = []
+        for sub_attempt in self.questions.all():
+            questions.append(sub_attempt.question)
+
+        return questions
+
+    def time_taken(self):
+        duration = self.completed_time - self.date_created
+        seconds = duration.seconds
+        return timedelta(days=0, seconds=seconds)
+
+    def calculate_score(self):
+        for sub_attempt in self.questions.all():
+             sub_attempt.calculate_score()
+             
+        if self.questions.filter(score = None).count() == 0:
+            for sub_attempt in self.questions.all():
+                self.score += sub_attempt.score
+            self.save()
     
 
 class SubAttempt(models.Model):
     attempt = models.ForeignKey(Attempt, related_name='questions', on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name='attempts', on_delete=models.CASCADE)
-    showed_shuffle_ansIndex = models.CharField(max_length=25)
+    showed_shuffle_ansIndex = models.CharField(max_length=25, blank=True, null=True)
     chosen_answers = models.ManyToManyField(Answer, related_name='attempts', blank=True)
     
     ans_text = RichTextField(blank=True, null=True)
@@ -166,3 +198,13 @@ class SubAttempt(models.Model):
     def __str__(self):
         return f'Sub_attempt-{self.question.num} on attempt-{self.attempt.pk}'
 
+    def get_showed_answers(self):
+        return [self.question.answers.all()[int(index)] for index in self.showed_shuffle_ansIndex.split(",")]
+
+    def calculate_score(self):
+        if self.question.cater != 'Typing Answer' and self.score == None:
+            total_correct = self.question.answers.filter(is_correct = True).count()
+            num_correct = self.chosen_answers.filter(is_correct = True).count()
+            self.score = (self.question.score * num_correct) / total_correct
+
+            self.save()

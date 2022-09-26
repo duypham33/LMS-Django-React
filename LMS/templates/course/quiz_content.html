@@ -35,7 +35,7 @@
     </div>
     <div class="divider"></div>
 
-    <form method="post" role="form" class="col s12">
+    <form method="post" action="{% url 'course:take_quiz' pk=quiz.pk %}" role="form" class="col s12">
         {% csrf_token %}
         {% if not view_mode %}
             <div class="col-auto text-right float-right ml-auto">

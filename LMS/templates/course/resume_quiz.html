@@ -1,0 +1,170 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="section">
+    <h5>{{quiz.cater}}</h5>
+   <h6>{{ quiz.title }}</h6>
+   <div class="divider"></div>
+
+    <div class="row">
+        <div class="col s3">
+            <h5>Due:</h5>
+            <p>{{ quiz.due_date }}</p>
+        </div>
+        <div class="col s3">
+            {% if quiz.num_attempts %}
+                <h5>Allowed Attempts:</h5>
+                <h6>{{ quiz.num_attempts }}</h6>
+            {% else %}
+                <h5>Unlimited Attempts</h5>
+            {% endif %}
+        </div>
+        <div class="col s3">
+            <h5>Attempt:</h5>
+            {% if not review_mode %}
+                <p>{{quiz|next_attempt_num:user}}</p>
+            {% else %}
+                <h5>{{num}}</h5>
+            {% endif %}
+        </div>
+
+        <div class="col s3">
+            {% if not review_mode %}
+                {% if quiz.time_limit %}
+                    <h5>Time limit:</h5>
+                    <p>{{ quiz.time_limit }}</p>
+                {% else %}
+                    <h5>Unlimited Time</h5>
+                {% endif %}
+            {% else %}
+                <h5>Completed at: {{ cur_attempt.completed_time }}</h5>
+                <p>Total time taken: {{ cur_attempt.time_taken }}</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col s12">
+        {{ quiz.description | safe }}  
+    </div>
+    <div class="divider"></div>
+
+    <form method="post" action="{% url 'course:take_quiz' pk=quiz.pk %}" role="form" class="col s12">
+        {% csrf_token %}
+        <div class="col-auto text-right float-right ml-auto">
+            {% if not review_mode %}
+            <button type="submit" class="btn waves-effect waves-light mt-3" name="method" value="return">
+                Return
+            </button>
+            {% else %}
+            <a href="{% url 'course:quiz_detail' pk=quiz.pk %}" class="btn waves-effect waves-light mt-3">
+                Back
+            </a>
+            {% endif %}
+        </div>
+
+        <br> <br>
+        <div class="col s12">          
+            {% for sub_attempt in cur_attempt.questions.all %}
+            <div class="col s12">
+                <br>
+                <p>Question {{ sub_attempt.question.num }} ({{sub_attempt.question.score}}pts):</p>
+               
+                <p> {{ sub_attempt.question.content | safe}} </p>
+            </div>
+
+            {% if sub_attempt.question.cater == 'Typing Answer' %}
+                {% if review_mode == True and sub_attempt.score == None %}
+                <div class="col-12 col-sm-6 text-warning">Need Graded</div>
+                {% elif review_mode == True %}
+                <div class="col-12 col-sm-6 text-success">Grade: {{sub_attempt.score}}</div>
+                {% endif %}
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <textarea class="form-control" name="text_ans_{{sub_attempt.id}}" rows="10" cols="80"
+                        {% if review_mode == True %} readonly {% endif %}>{{sub_attempt.ans_text|safe}}</textarea>
+                    </div>
+                </div>
+            {% else %}
+
+                {% if sub_attempt.question.cater == 'One Choice' %}
+                
+                    {% for answer in sub_attempt.get_showed_answers %}
+                    {% with ans_check=sub_attempt|check_selected:answer.id %}
+                    <div class="input col s12">
+                        <label>
+                            <input name="answer_{{sub_attempt.id}}" 
+                            type="radio" value="{{ answer.id }}" 
+                            {% if ans_check == True %} checked {% endif %}
+                            {% if review_mode == True %} disabled {% endif %}/>
+                            <span {% if review_mode == True and ans_check == True %}
+                            class="{% if answer.is_correct == True %}text-success
+                            {% else %}text-warning{% endif %}" {% endif %}>{{ answer.content | safe }}</span>
+
+                            {% if review_mode == True and answer.is_correct == True %}
+                            <span class="ml-3 text-success"> 
+                                <strong> Correct </strong>
+                            </span>
+                            {% endif %}
+                        </label>          
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+
+                {% else %}
+                    {% for answer in sub_attempt.get_showed_answers %}
+                    {% with ans_check=sub_attempt|check_selected:answer.id %}
+                    <div class="input col s12">
+                        <label>
+                            <input name="answer_{{sub_attempt.id}}" 
+                            type="checkbox" value="{{ answer.id }}" 
+                            {% if ans_check == True %} checked {% endif %}
+                            {% if review_mode == True %} disabled {% endif %}/>
+                            <span {% if review_mode == True and ans_check == True %}
+                            class="{% if answer.is_correct == True %}text-success
+                            {% else %}text-warning{% endif %}" {% endif %}>{{ answer.content | safe }}</span>
+
+                            {% if review_mode == True and answer.is_correct == True %}
+                            <span class="ml-3 text-success"> 
+                                <strong> Correct </strong>
+                            </span>
+                            {% endif %}
+                        </label>          
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if review_mode == True %}
+                <div class="col-12 col-sm-6 text-success">Grade: {{sub_attempt.score}} pts</div>
+                {% endif %}
+            
+            {% endif %}
+
+
+            <br><br>
+            {% endfor %}
+
+            
+            <div class="col s12">
+                {% if not review_mode %}
+                <button type="submit" class="btn waves-effect waves-light" name="method" value="submit">
+                Submit
+                </button>
+                {% else %}
+                <a href="{% url 'course:quiz_detail' pk=quiz.pk %}" class="btn waves-effect waves-light mt-3">
+                    Back
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </form>
+    
+    
+</div>
+
+
+<br><br><br>
+{% endblock %}

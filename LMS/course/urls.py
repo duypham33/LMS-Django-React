@@ -38,5 +38,7 @@ urlpatterns = [
 
     path('quiz/<int:pk>/delete', views.delete_quiz, name='delete_quiz'),
     path('quiz/<int:pk>/take', views.take_quiz, name='take_quiz'),
+
+    path('attempt/<int:pk>/attempt/<int:num>', views.view_attempt, name='view_attempt'),
 ]
 
