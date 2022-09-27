@@ -98,6 +98,12 @@ class Quiz(Base):
 
         return question_list
 
+    def calculate_score(self, theUser):
+        qur = self.attempts.filter(user = theUser)
+        if qur.exists() == True and qur.filter(score = None).count() == 0:
+            if not self.rule or self.rule == 'Latest Attempt':
+                pass  #Need Grade model
+
     
 
 class Question(models.Model):
@@ -181,8 +187,10 @@ class Attempt(Base):
              sub_attempt.calculate_score()
              
         if self.questions.filter(score = None).count() == 0:
+            sum = self.questions.first().score
             for sub_attempt in self.questions.all():
-                self.score += sub_attempt.score
+                sum += sub_attempt.score
+                self.score = sum
             self.save()
     
 
@@ -205,6 +213,76 @@ class SubAttempt(models.Model):
         if self.question.cater != 'Typing Answer' and self.score == None:
             total_correct = self.question.answers.filter(is_correct = True).count()
             num_correct = self.chosen_answers.filter(is_correct = True).count()
-            self.score = (self.question.score * num_correct) / total_correct
+            num_wrong = self.chosen_answers.count() - num_correct
 
-            self.save()
+            if num_correct < total_correct:
+                self.score = (self.question.score * num_correct) / total_correct
+            elif num_correct == total_correct and num_wrong == 0:
+                self.score = self.question.score
+            else:                
+                self.score = (self.question.score * max(num_correct - num_wrong, 0)) / total_correct
+
+            self.save(update_fields=['score'])
+
+
+
+
+
+class AssignmentFile(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    file = models.FileField(upload_to=user_directory_path)
+    posted = models.DateTimeField(auto_now_add=True)
+    assignment = models.ForeignKey('Assignment', on_delete=models.CASCADE, 
+                                    related_name='files', null=True, blank=True)
+    submission = models.ForeignKey('Submission', on_delete=models.CASCADE, 
+                                    related_name='files', null=True, blank=True)
+    
+    def get_file_name(self):
+        return os.path.basename(self.file.name)
+
+    def __str__(self):
+        return f'File-{self.id}'
+
+
+class Assignment(models.Model):
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, 
+                                related_name='assignments', null=True, blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length = 100)
+    description = RichTextField(blank=True, null=True)
+    point = models.DecimalField(max_digits=6, decimal_places=2)
+    due_date = models.DateTimeField()
+    num_attempts = models.PositiveIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Submission(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, 
+                            related_name='submissions', null=True, blank=True)
+    assignment = models.ForeignKey(Assignment, on_delete=models.SET_NULL, 
+                            related_name='submissions', null=True, blank=True)
+    quiz = models.ForeignKey(Quiz, on_delete=models.SET_NULL, 
+                            related_name='submissions', null=True, blank=True)
+    submit_time = models.DateTimeField(auto_now_add = True)
+    grade = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f'Submission of {self.user.get_name()} on {self.assignment}'
+
+
+class SubmissionComment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, 
+                            related_name='submission_comments', null=True, blank=True)
+    comment = models.TextField(max_length = 500)
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, 
+                        related_name='comments')
+    posted_date = models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):
+        return f'Submission Comment - {self.pk}'
+
+
+
+    

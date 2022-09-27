@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt
+from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt, Assignment, Submission
 # Register your models here.
 
 admin.site.register(Module)
@@ -10,3 +10,5 @@ admin.site.register(Question)
 admin.site.register(Answer)
 admin.site.register(Attempt)
 admin.site.register(SubAttempt)
+admin.site.register(Assignment)
+admin.site.register(Submission)

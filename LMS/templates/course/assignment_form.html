@@ -19,12 +19,12 @@
 
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
-                        <label>Content</label>
-                        {{form.content}}
+                        <label>Description</label>
+                        {{form.description}}
                     </div>
                 </div>
 
-                {% if feature == 'Edit Page' %}
+                {% if feature == 'Edit Assignment' %}
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
                         <label><i class="fas fa-trash mr-1"></i>Uploaded Files - Choose multiple options by 'alt' key</label>
@@ -42,33 +42,62 @@
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
                         <div class="btn">
-                            <span> {% if feature == 'New Page' %} Files {% else %} Add another files {% endif %}</span>
+                            <span> {% if feature == 'New Assignment' %} Files {% else %} Add another files {% endif %}</span>
                             {{ form.files }}
                         </div>
                         <div class="file-path-wrapper">
-                            <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                            <input class="file-path validate" type="text" placeholder="Upload one or more files" readonly>
                         </div>
                     </div>
                 </div>
                 <br>
+
+
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
-                        <label>Status</label>
-                        <select class="form-control" name="status">
-                            {% if form.instance.published == True %}
-                            <option value="published">Published</option>
-                            <option value="private">Private</option>
-                            {% else %}
-                            <option value="private">Private</option>
-                            <option value="published">Published</option>
-                            {% endif %}
-                        </select>
+                        <label>Maximum Point</label>
+                        {{form.point}}
                     </div>
                 </div>
-                
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Number of Attempts (Skip if not limit)</label>
+                        {% if feature != 'Edit Assignment' or not form.instance.num_attempts %}
+                        <input type="text" name="num_attempts" placeholder="Not limit">
+                        {% else %}
+                        <input type="text" name="num_attempts" value="{{form.instance.num_attempts}}">
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Due date</label>
+                        {% if feature == 'Edit Assignment' %}
+                        <input type="text" value="Current: {{form.instance.due_date.date}}" readonly>
+                        <label>New due date?</label>
+                        {% endif %}
+
+                        {{form.dueDate}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Due by time</label>
+                        <input type="time" name="due_time" required value="{{due_time}}">
+                    </div>
+                </div>
+
                 
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary mr-3">Submit</button>
+
+                    {% if feature == 'Edit Assignment' %}
+                    <a href="{% url 'course:assignment' pk=form.instance.id %}" class="btn btn-primary">Back</a>
+                    {% endif %}
                 </div>
              </form>
           </div>

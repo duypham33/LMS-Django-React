@@ -1,0 +1,129 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block content %}
+
+<div class="section">
+   {% if owner == True %}
+    <div class="col-auto text-right float-right ml-auto">
+        <a href="{% url 'course:edit_assignment' pk=assignment.pk %}" class="btn btn-primary"><i class="fas fa-pen"></i></a>
+        <a href="#" class="btn btn-primary"><i class="fas fa-trash"></i></a>
+    </div>
+    {% endif %}
+
+    <h4>{{ assignment.title }}</h4>
+   <div class="divider"></div>
+</div>
+<div class="row">
+   <div class="col s12">
+      {{ assignment.description | safe }}
+
+        <div class="col s12 mt-2 text-muted">
+            <span class="mr-5"> 
+                <strong>Due </strong>{{assignment.due_date.date}} at {{assignment.due_date.time}} 
+            </span>
+            <p>
+                {% if assignment.num_attempts == 1 %}
+                    Only one attempt allowed!
+                {% elif assignment.num_attempts > 1 %}
+                    Allowed {{assignment.num_attempts}} attempts taken.
+
+                    {% if owner != True and  assignment|user_num_submx:user < assignment.num_attempts %} 
+                        This will be your {{assignment|next_submx_num:user}} attempt!
+                    {% endif %}
+                {% else %}
+                    This assessment has unlimited attempts.
+
+                    {% if owner != True and assignment|user_num_submx:user < assignment.num_attempts %}
+                        This will be your {{assignment|next_submx_num:user}} attempt!
+                    {% endif %}
+                {% endif %}
+            </p>
+        </div>
+   </div>
+
+   
+   <div class="col s12">
+      <ul class="collection with-header">
+         <li class="collection-header">
+            <h4>Files</h4>
+         </li>
+         {% for file in assignment.files.all %}
+         <li class="collection-item">
+            <div>{{ file.get_file_name }}<a class="secondary-content" href="{{ file.file.url }}" download>
+               <i class="material-icons">download</i></a>
+            </div>
+         </li>
+         {% endfor %}    
+      </ul>
+
+      {% if feature != 'Submit Assignment' %}
+        {% if assignment|user_num_submx:user > 0 %}
+        <div class="ml-3 mt-4">
+            <strong>Your Submissions:</strong>
+            {% for s in assignment|get_user_submx:user %}
+                <div class="mt-3 h5">
+                    <a href="{% url 'course:submission_detail' pk=s.pk num=forloop.counter %}"> 
+                        Attempt {{forloop.counter}}
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %} 
+      {% endif %} 
+   </div>
+</div>
+
+
+{% if owner == True %}
+    <a class="btn btn-primary mt-4 mr-3 ml-3 mb-3" href="#">
+        Submissions
+    </a>
+{% elif feature != 'Submit Assignment' %}
+    {% if assignment|user_num_submx:user < assignment.num_attempts %}
+    <a href="{% url 'course:submit_assignment' pk=assignment.pk %}" class="btn btn-primary mt-4 mr-3 ml-3 mb-3">
+        Start Assignment
+    </a>
+    {% endif %}
+{% else %}
+    <div class="row">
+        <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="col-12">
+                        <h5 class="form-title"><span>{{feature}}</span></h5>
+                    </div>
+                    
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group">
+                            <div class="btn">
+                                <span> Upload Files </span>
+                                {{ form.files }}
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text" placeholder="Upload one or more files" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-12 col-sm-6">
+                        <div class="form-group">
+                            <textarea class="form-control" rows="1" cols="30" name="comment" placeholder="Comment"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary mr-3">Submit</button>
+
+                        <a href="{% url 'course:assignment' pk=assignment.pk %}" class="btn btn-primary">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

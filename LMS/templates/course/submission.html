@@ -1,0 +1,101 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load custom_tags %}
+{% block content %}
+
+<div class="section">
+    <div class="col-12">
+        <h5 class="form-title"><span class="h2">Submission Detail</span></h5>
+    </div>
+    <h5>{{ assignment.title }}</h5>
+   <div class="divider"></div>
+</div>
+<div class="row">
+   <div class="col s12">
+      {{ assignment.description | safe }}
+
+        <div class="col s12 mt-2 text-muted">
+            <span class="mr-5"> 
+                <strong>Due </strong>{{assignment.due_date.date}} at {{assignment.due_date.time}} 
+            </span>
+            <p>
+                {% if assignment.num_attempts == 1 %}
+                    Only one attempt allowed!
+                {% elif assignment.num_attempts > 1 %}
+                    Allowed {{assignment.num_attempts}} attempts taken. 
+                    This submission is your 
+                    <span class="text-success">
+                        {{num|convert_2order}}
+                    </span>
+                    attempt!
+                {% else %}
+                    This assessment has unlimited attempts.
+                    This submission is your 
+                    <span class="text-success">
+                        {{num|convert_2order}}
+                    </span>
+                    attempt!
+                {% endif %}
+            </p>
+        </div>
+   </div>
+
+   
+   <div class="col s12">
+      <ul class="collection with-header">
+         <li class="collection-header">
+            <h4>Files</h4>
+         </li>
+         {% for file in submission.files.all %}
+         <li class="collection-item">
+            <div>{{ file.get_file_name }}<a class="secondary-content" href="{{ file.file.url }}" download>
+               <i class="material-icons">download</i></a>
+            </div>
+         </li>
+         {% endfor %}    
+      </ul>
+
+        {% if assignment|user_num_submx:user < assignment.num_attempts %} 
+        <a href="{% url 'course:submit_assignment' pk=assignment.pk %}" class="btn btn-primary mt-4 mr-3 ml-3 mb-3">
+            Re-submit
+        </a>
+        {% endif %} 
+   </div>
+</div>
+
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %} 
+
+    {% for comment in submission.comments.all %}
+    <div class="card mt-2 col-6">
+        <div class="card-header">
+            <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{comment.user.avatar}}" alt="User Image"></a> 
+            <strong> {{comment.user.get_name}} </strong> 
+        </div>
+        
+        <div class="card-body d-flex flex-row justify-content-between">
+            <div> <p> {{comment.comment}} </p> </div>
+        </div>
+        
+        <div class="card-footer text-muted"> Posted on: {{comment.posted_date|timesince}} </div>
+    </div>
+    {% endfor %} 
+
+    <div class="col-12 col-sm-6">
+        <div class="form-group">
+            <label>Add Comment: </label>
+            <textarea class="form-control" rows="1" cols="30" name="comment" placeholder="Comment"></textarea>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary mr-3">Post</button>
+
+        <a href="{% url 'course:assignment' pk=assignment.pk %}" class="btn btn-primary">Back</a>
+    </div>
+</form>
+
+<br><br><br><br><br><br>
+
+{% endblock %}

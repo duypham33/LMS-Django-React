@@ -64,17 +64,15 @@
     {% endif %}
     {% endif %}
 
-    {% with num_completed=quiz|num_completed_attempts:user %}
-        <div class="ml-3 mt-4"> 
-            {% for n in 1|custom_range:num_completed %}
-                <div class="mt-3 h5">
-                    <a href="{% url 'course:view_attempt' pk=quiz.pk num=n %}"> 
-                        Attempt {{n}}
-                    </a>
-                </div>
-            {% endfor %}
-        </div>
-    {% endwith %}
+    <div class="ml-3 mt-4"> 
+        {% for a in completed_attempts.all %}
+            <div class="mt-3 h5">
+                <a href="{% url 'course:view_attempt' pk=quiz.pk num=a.num %}"> 
+                    Attempt {{a.num}} <span class="ml-2 text-success">{{a|get_attempt_score}}</span>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% endblock %}

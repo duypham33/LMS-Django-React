@@ -2,8 +2,8 @@ import re
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from app.models import Course, Notification
-from .forms import SyllabusForm, ModuleForm, PageForm, QuizForm, QuestionForm, AnswerForm
-from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt
+from .forms import SyllabusForm, ModuleForm, PageForm, QuizForm, QuestionForm, AnswerForm, AssignmentForm, SubmissionForm
+from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt, Assignment, AssignmentFile, Submission, SubmissionComment
 from django.contrib import messages
 import os
 from datetime import datetime, timezone, timedelta
@@ -177,7 +177,9 @@ def edit_page(request, pk):
             file_id = request.POST.getlist('trash')
             files = request.FILES.getlist('files')
 
-            if 'all' in file_id:
+            if 'none' in file_id:
+                deleted_files = []
+            elif 'all' in file_id:
                 deleted_files = page.files.all()
             else:
                 deleted_files = [PostFileContent.objects.get(id = id) for id in file_id]
@@ -245,7 +247,12 @@ def create_quiz(request, pk):
             
             q = Quiz.objects.create(module=module, title=title, description=description, cater=cater,
             num_attempts=num_attempts, time_limit=time_limit, due_date=due_date, score=score,
-            rule=rule, published=status, closed=closed)
+            rule=rule)
+
+            q.published = status
+            q.closed = closed
+            q.save(update_fields=['published', 'closed'])
+            #Useful for signals to send notice to everyone
 
             messages.success(request, 'New quiz is created! Let\'s create questions!')
             return redirect('course:init_question', pk=q.pk)
@@ -345,8 +352,10 @@ def quiz_detail(request, pk):
     quiz = Quiz.objects.get(pk = pk)
     course = quiz.module.course
     owner = course.instructor.user == request.user
+    completed_attempts = quiz.attempts.filter(user = request.user, status = 'Completed')
 
-    context = {'course_mode': True, 'course': course, 'feature': quiz.cater, 'quiz': quiz, 'owner': owner}
+    context = {'course_mode': True, 'course': course, 'feature': quiz.cater, 
+               'quiz': quiz, 'owner': owner, 'completed_attempts': completed_attempts}
     return render(request, 'course/quiz.html', context = context)
 
 
@@ -375,8 +384,6 @@ def edit_quiz(request, pk):
 
             quiz.num_attempts = None if num_attempts == '' else num_attempts
             quiz.time_limit = None if time_limit == '' else timedelta(days=0, seconds=int(60*int(time_limit)))
-            quiz.published = status == "published"
-            quiz.closed = closed == "close"
 
             h, m = due_time.split(':')
             due_time = datetime.strptime(f'{h}.{m}', "%H.%M").time()
@@ -384,6 +391,16 @@ def edit_quiz(request, pk):
             quiz.due_date = datetime.combine(dueDate, due_time)
             
             quiz.save()
+
+            published = status == "published"
+            if quiz.published != published:
+                quiz.published = published
+                quiz.save(update_fields=['published'])
+            closed = closed == "close"
+            if quiz.closed != closed:
+                quiz.closed = closed
+                quiz.save(update_fields=['closed'])
+            #Useful for signals to send notice to everyone
 
             messages.success(request, 'The quiz is updated generaly! Let\'s update questions in detail!')
             return redirect('course:edit_quiz', pk=pk)
@@ -676,3 +693,181 @@ def view_attempt(request, pk, num):
     context = {'course_mode': True, 'course': course, 'quiz': quiz, 
         'questions': questions, 'cur_attempt': cur_attempt, 'num': num, 'review_mode': True}
     return render(request, 'course/resume_quiz.html', context = context)
+
+
+
+
+#Assignment features
+
+@login_required(login_url='login/')
+def create_assignment(request, pk):
+    module = Module.objects.get(pk = pk)
+    course = module.course
+    
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            dueDate = form.cleaned_data.get('dueDate')
+            if dueDate == None or dueDate == '':
+                messages.warning(request, 'Due date is required!')
+                return redirect('course:create_assignment', pk=pk)
+
+            title = form.cleaned_data.get('title')
+            description = form.cleaned_data.get('description')
+            num_attempts = request.POST.get('num_attempts')
+            due_time = request.POST.get('due_time')
+            point = form.cleaned_data.get('point')
+
+            num_attempts = None if num_attempts == '' else num_attempts
+            
+            h, m = due_time.split(':')
+            due_time = datetime.strptime(f'{h}.{m}', "%H.%M").time()
+            due_date = datetime.combine(dueDate, due_time)
+            
+            a = Assignment.objects.create(module=module, title=title, description=description,
+            num_attempts=num_attempts, due_date=due_date, point=point)
+
+            files = request.FILES.getlist('files')
+            for file in files:
+                AssignmentFile.objects.create(owner = request.user, file=file, assignment=a)
+
+            messages.success(request, f'New assignment is created in module \'{module.title}\'!')
+            return redirect('course:module', pk = course.pk)
+    else:
+        form = AssignmentForm()
+    
+    context = {'course_mode': True, 'course': course, 'feature': 'New Assignment', 'form': form}
+    return render(request, 'course/assignment_form.html', context = context)
+
+
+@login_required(login_url='login/')
+def assignment(request, pk):
+    assignment = Assignment.objects.get(pk = pk)
+    course = assignment.module.course
+    owner = request.user == course.instructor.user
+    context = {'course_mode': True, 'course': course, 'assignment': assignment, 'owner': owner}
+    
+    return render(request, 'course/assignment.html', context = context)
+
+
+
+
+@login_required(login_url='login/')
+def edit_assignment(request, pk):
+    assignment = Assignment.objects.get(pk = pk)
+    course = assignment.module.course
+    due_time = assignment.due_date.time().strftime("%H:%M")
+
+    if request.method == 'POST':
+        form = AssignmentForm(request.POST, request.FILES, instance=assignment)
+        if form.is_valid():
+            assignment.title = form.cleaned_data.get('title')
+            assignment.description = form.cleaned_data.get('description')
+            num_attempts = request.POST.get('num_attempts')
+            dueDate = form.cleaned_data.get('dueDate')
+            due_time = request.POST.get('due_time')
+            assignment.point = form.cleaned_data.get('point')
+
+            assignment.num_attempts = None if num_attempts == '' else num_attempts
+            
+            h, m = due_time.split(':')
+            due_time = datetime.strptime(f'{h}.{m}', "%H.%M").time()
+            dueDate = assignment.due_date.date() if dueDate==None or dueDate=='' else dueDate
+            assignment.due_date = datetime.combine(dueDate, due_time)
+            
+
+            file_id = request.POST.getlist('trash')
+            files = request.FILES.getlist('files')
+
+            if 'none' in file_id:
+                deleted_files = []
+            elif 'all' in file_id:
+                deleted_files = assignment.files.all()
+            else:
+                deleted_files = [AssignmentFile.objects.get(id = id) for id in file_id]
+            for f in deleted_files:
+                f.delete()
+
+            for file in files:
+                AssignmentFile.objects.create(file=file, owner=request.user, assignment=assignment)
+
+            assignment.save()
+
+            messages.success(request, 'The assignment is updated!')
+            return redirect('course:edit_assignment', pk=pk)
+    else:
+        form = AssignmentForm(instance=assignment)
+    
+    context = {'course_mode': True, 'course': course, 'feature': 'Edit Assignment', 
+    'form': form, 'due_time': due_time}
+    return render(request, 'course/assignment_form.html', context = context)
+
+
+
+
+@login_required(login_url='login/')
+def delete_assignment(request, pk):
+    assignment = Assignment.objects.get(pk = pk)
+    course = assignment.module.course
+    assignment.delete()
+    messages.success(request, 'The assignment is removed!')
+    
+    return redirect('course:module', pk = course.pk)
+
+
+
+
+@login_required(login_url='login/')
+def submit_assignment(request, pk):
+    assignment = Assignment.objects.get(pk = pk)
+    course = assignment.module.course
+    
+    if request.method == 'POST':
+        form = SubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            files = request.FILES.getlist('files')
+            comment = request.POST.get('comment')
+            
+            if files and files != []:
+                for file in files:
+                    s = Submission.objects.create(user = request.user, assignment = assignment)
+                    AssignmentFile.objects.create(owner = request.user, file = file, submission = s)
+
+                    if comment and comment != '':
+                        SubmissionComment.objects.create(user = request.user, 
+                        submission = s, comment = comment)
+
+                messages.success(request, 'Your assignment is submitted successfully!')
+                return redirect('course:submission_detail', pk = s.pk, 
+                num = assignment.submissions.filter(user = request.user).count())
+    else:
+        form = AssignmentForm()
+    
+    context = {'course_mode': True, 'course': course, 
+    'feature': 'Submit Assignment', 'form': form, 'assignment': assignment}
+    return render(request, 'course/assignment.html', context = context)
+
+
+@login_required(login_url='login/')
+def submission_detail(request, pk, num):
+    submission = Submission.objects.get(pk = pk)
+    assignment = submission.assignment
+    course = assignment.module.course
+    
+    if request.method == 'POST':
+        comment = request.POST.get('comment')
+        if comment and comment != '':
+            SubmissionComment.objects.create(user = request.user, 
+            submission = submission, comment = comment)
+
+            messages.success(request, 'Your comment is posted!')
+        else:
+            messages.warning(request, 'You haven\'t added your comment yet!')
+        return redirect('course:submission_detail', pk = pk, num = num)
+
+    context = {'course_mode': True, 'course': course, 'submission': submission, 
+    'assignment': assignment, 'num': num}
+    return render(request, 'course/submission.html', context = context)
+
+
+

@@ -40,5 +40,12 @@ urlpatterns = [
     path('quiz/<int:pk>/take', views.take_quiz, name='take_quiz'),
 
     path('attempt/<int:pk>/attempt/<int:num>', views.view_attempt, name='view_attempt'),
+
+    path('module/<int:pk>/assignment/new', views.create_assignment, name='create_assignment'),
+    path('assignment/<int:pk>', views.assignment, name='assignment'),
+    path('assignment/<int:pk>/edit', views.edit_assignment, name='edit_assignment'),
+    path('assignment/<int:pk>/submit', views.submit_assignment, name='submit_assignment'),
+
+    path('submission/<int:pk>/<int:num>', views.submission_detail, name='submission_detail'),
 ]
 
