@@ -63,4 +63,14 @@ def next_submx_num(assignment, user):
 @register.filter()
 def convert_2order(num):
 	order = ['', 'st', 'nd', 'rd', 'th']
-	return str(num) + order[min(num,4)]
+	return str(num) + order[min(int(num),4)]
+
+@register.filter()
+def to_str(num):
+	return str(num)
+
+
+@register.filter()
+def last_subx(assignment, user):
+	return Submission.objects.filter(assignment = assignment, user = user).last()
+

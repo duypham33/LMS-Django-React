@@ -15,7 +15,9 @@
     <a href="#"><i class="fa fa-question-circle"></i> <span> Quizzes </span></a>
  </li>
  <li>
-    <a href="#"><i class="fa fa-tasks"></i> <span> Assignments </span></a>
+    <a href="{% url 'course:view_assignments' pk=course.pk %}"><i class="fa fa-tasks"></i> 
+      <span> Assignments </span>
+   </a>
  </li>
  <li>
     <a href="#"><i class="fa fa-marker"></i> <span> Grades </span></a>

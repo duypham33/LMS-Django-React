@@ -2,11 +2,12 @@ import re
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from app.models import Course, Notification
-from .forms import SyllabusForm, ModuleForm, PageForm, QuizForm, QuestionForm, AnswerForm, AssignmentForm, SubmissionForm
-from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt, Assignment, AssignmentFile, Submission, SubmissionComment
+from .forms import SyllabusForm, ModuleForm, PageForm, QuizForm, QuestionForm, AnswerForm, AssignmentForm, SubmissionForm, GradeForm
+from .models import Module, Page, PostFileContent, Quiz, Question, Answer, Attempt, SubAttempt, Assignment, AssignmentFile, Submission, SubmissionComment, Grade
 from django.contrib import messages
 import os
 from datetime import datetime, timezone, timedelta
+from app.models import User
 # Create your views here.
 
 
@@ -854,20 +855,63 @@ def submission_detail(request, pk, num):
     assignment = submission.assignment
     course = assignment.module.course
     
+    grade = None if submission.is_graded() == False else submission.grade
     if request.method == 'POST':
+        if request.user != '3':
+            if grade:
+                form = GradeForm(request.POST, instance = grade)
+            else:
+                form = GradeForm(request.POST)
+            if form.is_valid():
+                point = form.cleaned_data.get('point')
+                grade, _ = Grade.objects.get_or_create(submission=submission, student=submission.user)
+                grade.grader = request.user
+                if point != None and grade.point != point:
+                    grade.point = point
+                    grade.save(update_fields=['point'])  #Signal sends notice
+                    messages.success(request, 'The grade is updated!')
+
         comment = request.POST.get('comment')
         if comment and comment != '':
             SubmissionComment.objects.create(user = request.user, 
             submission = submission, comment = comment)
 
             messages.success(request, 'Your comment is posted!')
-        else:
-            messages.warning(request, 'You haven\'t added your comment yet!')
         return redirect('course:submission_detail', pk = pk, num = num)
 
-    context = {'course_mode': True, 'course': course, 'submission': submission, 
-    'assignment': assignment, 'num': num}
+    else:
+        if request.user != '3':
+            if grade:
+                form = GradeForm(instance = grade)
+            else:
+                form = GradeForm()
+
+    if request.user.user_type != '3':
+        context = {'course_mode': True, 'course': course, 'submission': submission, 
+        'assignment': assignment, 'form': form}
+    else:
+        context = {'course_mode': True, 'course': course, 'submission': submission, 
+        'assignment': assignment, 'num': int(num)}
     return render(request, 'course/submission.html', context = context)
 
+
+
+@login_required(login_url='login/')
+def view_assignments(request, pk):
+    course = Course.objects.get(pk = pk)
+    assignments = Assignment.objects.filter(module__course = course).all()
+
+    context = {'course_mode': True, 'course': course, 'assignments': assignments}
+    return render(request, 'course/view_assignments.html', context = context)
+
+
+@login_required(login_url='login/')
+def view_submissions(request, pk):
+    assignment = Assignment.objects.get(pk = pk)
+    course = assignment.module.course
+    students = User.objects.filter(submissions__assignment = assignment).distinct()
+
+    context = {'course_mode': True, 'course': course, 'assignment': assignment , 'students': students}
+    return render(request, 'course/view_submissions.html', context = context)
 
 

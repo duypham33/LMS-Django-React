@@ -1,4 +1,5 @@
 
+from email.policy import default
 from django.db import models
 from app.models import Course, User
 import os
@@ -253,6 +254,7 @@ class Assignment(models.Model):
     point = models.DecimalField(max_digits=6, decimal_places=2)
     due_date = models.DateTimeField()
     num_attempts = models.PositiveIntegerField(null=True, blank=True)
+    closed = models.BooleanField(default = False)
 
     def __str__(self):
         return self.title
@@ -263,13 +265,13 @@ class Submission(models.Model):
                             related_name='submissions', null=True, blank=True)
     assignment = models.ForeignKey(Assignment, on_delete=models.SET_NULL, 
                             related_name='submissions', null=True, blank=True)
-    quiz = models.ForeignKey(Quiz, on_delete=models.SET_NULL, 
-                            related_name='submissions', null=True, blank=True)
     submit_time = models.DateTimeField(auto_now_add = True)
-    grade = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return f'Submission of {self.user.get_name()} on {self.assignment}'
+
+    def is_graded(self):
+        return Grade.objects.filter(submission = self).exists()
 
 
 class SubmissionComment(models.Model):
@@ -283,6 +285,21 @@ class SubmissionComment(models.Model):
     def __str__(self):
         return f'Submission Comment - {self.pk}'
 
+
+class Grade(models.Model):
+    submission = models.OneToOneField(Submission, on_delete=models.SET_NULL, related_name="grade",
+                                      null=True, blank=True)
+    quiz = models.ForeignKey(Quiz, on_delete=models.SET_NULL, related_name="grades",
+                             null=True, blank=True)
+    student = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="grades",
+                             null=True, blank=True)
+    grader = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="grades_made",
+                             null=True, blank=True)
+    date_graded = models.DateTimeField(auto_now_add = True)
+    point = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f'Grade - {self.pk}'
 
 
     

@@ -1,0 +1,84 @@
+{% extends 'index.html' %}
+{% load custom_tags %}
+{% block content %} 
+
+<div class="content container-fluid">
+    <div class="page-header">
+       <div class="row align-items-center">
+          <div class="col">
+             <h3 class="page-title"> Assignment {{assignment.title}}</h3>
+             <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Submissions</li>
+             </ul>
+          </div>
+          <div class="col-auto text-right float-right ml-auto">
+             <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Download</a>
+          </div>
+       </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
+           <div class="card card-table">
+              <div class="card-body">
+                 <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0 datatable">
+                       <tbody>
+                        <thead>
+                            <tr>
+                               <th>ID</th>
+                               <th>Name</th>
+                               <th>Email</th>
+                               <th>Attempts Taken</th>
+                               <th>Last Submission Time</th>
+                               <th>Grade</th>
+                            </tr>
+                         </thead>
+                         {% for stu in students %}
+                          <tr>
+                            <td>{{stu.student.student_id}}</td>
+                            <td>
+                                <h2 class="table-avatar">
+                                   <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{stu.avatar}}" alt="User Image"></a>
+                                   <a href="#">{{stu.get_name}}</a>
+                                </h2>
+                             </td>
+                             <td>{{stu.email}}</td>
+
+                             {% with num_attempts=assignment|user_num_submx:stu %}
+                             <td> {{num_attempts}} {% if num_attempts == 1 %}attempt{% else %}attempts{% endif %} </td>
+
+                             {% with last_sub=assignment|last_subx:stu %}
+                             <td>
+                                <a href="{% url 'course:submission_detail' pk=last_sub.pk num=num_attempts %}">
+                                Last at: {{last_sub.submit_time}}
+                                </a>
+                            </td>
+                              
+                            <td>
+                                <a href="{% url 'course:submission_detail' pk=last_sub.pk num=num_attempts %}">
+                                 {% if last_sub.is_graded == False %}
+                                    Not Yet Grade
+                                 {% else %}
+                                    {{last_sub.grade.point}} pts
+                                 {% endif %}
+                                </a>
+                            </td>
+
+                             {% endwith %}
+                             {% endwith %}
+                          </tr>
+                          {% endfor %}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+
+ </div>
+
+
+{% endblock %}

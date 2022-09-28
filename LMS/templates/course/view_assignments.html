@@ -1,0 +1,70 @@
+{% extends 'index.html' %}
+{% load custom_tags %}
+{% block content %} 
+
+<div class="content container-fluid">
+    <div class="page-header">
+       <div class="row align-items-center">
+          <div class="col">
+             <h3 class="page-title"> Assignments </h3>
+             <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Assignments</li>
+             </ul>
+          </div>
+          <div class="col-auto text-right float-right ml-auto">
+             <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Download</a>
+          </div>
+       </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
+           <div class="card card-table">
+              <div class="card-body">
+                 <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0 datatable">
+                       <tbody>
+                         {% for assignment in assignments %}
+                          <tr>
+                             <td>
+                                <h2 class="table-avatar">
+                                    <a href="{% url 'course:assignment' pk=assignment.pk %}">
+                                        <i class="fa fa-tasks mr-2"></i> {{ assignment.title }}
+                                    </a>
+                                </h2>
+                             </td>
+                             <td>{% if assignment.closed == False %} Open {% else %} Closed {% endif %}</td>
+                             <td>Due {{assignment.due_date.date}} at {{assignment.due_date.time}}</td>
+                             <td>Total: {{assignment.point}} pts</td>
+    
+                             {% if user.user_type == 3|to_str %}
+                             {% with last_sub=assignment|last_subx:user %}
+                             <td class="text-right">
+                                <a href="{% url 'course:assignment' pk=assignment.pk %}">
+                                    {% if assignment|user_num_submx:user == 0 %}
+                                        Not Yet Submitted
+                                    {% elif last_sub.is_graded == False %}
+                                        Not Yet Graded
+                                    {% else %}
+                                       {{last_sub.grade.point}} pts
+                                    {% endif %}
+                                </a>
+                             </td>
+                             {% endwith %}
+                             {% endif %}
+                             
+                          </tr>
+                          {% endfor %}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+
+ </div>
+
+
+{% endblock %}

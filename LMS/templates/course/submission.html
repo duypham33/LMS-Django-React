@@ -6,8 +6,51 @@
 <div class="section">
     <div class="col-12">
         <h5 class="form-title"><span class="h2">Submission Detail</span></h5>
+
+        {% if user.user_type != 3|to_str %}
+        <div class="table-responsive">
+            <table class="table table-hover table-center mb-0 datatable">
+                <tbody>
+                    <tr>
+                        <td>ID: {{submission.user.student.student_id}}</td>
+                        <td>
+                            <h2 class="table-avatar">
+                                <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{submission.user.avatar}}" alt="User Image"></a>
+                                <a href="#">{{submission.user.get_name}}</a>
+                            </h2>
+                        </td>
+                        <td>Email: {{submission.user.email}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <form method="post" class="form-inline">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label>Grade: </label>
+                    {{form.point}}
+                    <button type="submit" class="btn btn-primary mr-3">Grade</button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        {% if num == assignment|user_num_submx:user and submission.is_graded == True %}
+        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <form method="post" class="form-inline">
+                {% csrf_token %}
+                <div class="form-group row">
+                    <label>Grade: </label>
+                    <input type="text" readonly value="{{submission.grade.point}} pts">
+                </div>
+            </form>
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
     <h5>{{ assignment.title }}</h5>
+    
    <div class="divider"></div>
 </div>
 <div class="row">
@@ -18,6 +61,7 @@
             <span class="mr-5"> 
                 <strong>Due </strong>{{assignment.due_date.date}} at {{assignment.due_date.time}} 
             </span>
+            {% if user.user_type == 3|to_str %}
             <p>
                 {% if assignment.num_attempts == 1 %}
                     Only one attempt allowed!
@@ -37,6 +81,7 @@
                     attempt!
                 {% endif %}
             </p>
+            {% endif %}
         </div>
    </div>
 
@@ -52,19 +97,21 @@
                <i class="material-icons">download</i></a>
             </div>
          </li>
-         {% endfor %}    
+         {% endfor %}   
       </ul>
 
-        {% if assignment|user_num_submx:user < assignment.num_attempts %} 
+      {% if user.user_type == 3|to_str and assignment.closed == False %}
+        {% if assignment.num_attempts == None or assignment|user_num_submx:user < assignment.num_attempts %} 
         <a href="{% url 'course:submit_assignment' pk=assignment.pk %}" class="btn btn-primary mt-4 mr-3 ml-3 mb-3">
             Re-submit
         </a>
         {% endif %} 
+      {% endif %} 
    </div>
 </div>
 
 
-<form method="post" enctype="multipart/form-data">
+<form method="post">
     {% csrf_token %} 
 
     {% for comment in submission.comments.all %}

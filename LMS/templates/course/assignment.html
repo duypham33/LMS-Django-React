@@ -28,13 +28,12 @@
                 {% elif assignment.num_attempts > 1 %}
                     Allowed {{assignment.num_attempts}} attempts taken.
 
-                    {% if owner != True and  assignment|user_num_submx:user < assignment.num_attempts %} 
+                    {% if user.user_type == 3|to_str and  assignment|user_num_submx:user < assignment.num_attempts and assignment.closed == False %} 
                         This will be your {{assignment|next_submx_num:user}} attempt!
                     {% endif %}
                 {% else %}
                     This assessment has unlimited attempts.
-
-                    {% if owner != True and assignment|user_num_submx:user < assignment.num_attempts %}
+                    {% if user.user_type == 3|to_str and assignment.closed == False %}
                         This will be your {{assignment|next_submx_num:user}} attempt!
                     {% endif %}
                 {% endif %}
@@ -58,7 +57,8 @@
       </ul>
 
       {% if feature != 'Submit Assignment' %}
-        {% if assignment|user_num_submx:user > 0 %}
+        {% with num_submx=assignment|user_num_submx:user %}
+        {% if num_submx > 0 %}
         <div class="ml-3 mt-4">
             <strong>Your Submissions:</strong>
             {% for s in assignment|get_user_submx:user %}
@@ -66,24 +66,30 @@
                     <a href="{% url 'course:submission_detail' pk=s.pk num=forloop.counter %}"> 
                         Attempt {{forloop.counter}}
                     </a>
+                    {% if forloop.counter == num_submx and s.is_graded == True %}
+                        <span class="ml-2">{{s.grade.point}} pts</span>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
-        {% endif %} 
+        {% endif %}
+        {% endwith %} 
       {% endif %} 
    </div>
 </div>
 
 
-{% if owner == True %}
-    <a class="btn btn-primary mt-4 mr-3 ml-3 mb-3" href="#">
+{% if user.user_type != 3|to_str %}
+    <a class="btn btn-primary mt-4 mr-3 ml-3 mb-3" href="{% url 'course:view_submissions' pk=assignment.pk %}">
         Submissions
     </a>
 {% elif feature != 'Submit Assignment' %}
-    {% if assignment|user_num_submx:user < assignment.num_attempts %}
+    {% if assignment.closed == False %}
+    {% if assignment.num_attempts == None or assignment|user_num_submx:user < assignment.num_attempts %}
     <a href="{% url 'course:submit_assignment' pk=assignment.pk %}" class="btn btn-primary mt-4 mr-3 ml-3 mb-3">
         Start Assignment
     </a>
+    {% endif %}
     {% endif %}
 {% else %}
     <div class="row">

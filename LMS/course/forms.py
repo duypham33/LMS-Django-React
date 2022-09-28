@@ -2,7 +2,7 @@ from atexit import register
 from django import forms
 from ckeditor.widgets import CKEditorWidget
 from app.models import Course
-from .models import Module, Page, Quiz, Question, Answer, SubAttempt, Assignment, Submission
+from .models import Module, Page, Quiz, Question, Answer, SubAttempt, Assignment, Submission, Grade
 
 class SyllabusForm(forms.ModelForm):
 	syllabus = forms.CharField(widget=CKEditorWidget())
@@ -73,3 +73,8 @@ class SubmissionForm(forms.ModelForm):
 		model = Submission
 		fields = ['files']
 
+
+class GradeForm(forms.ModelForm):
+	class Meta:
+		model = Grade
+		fields = ['point']
