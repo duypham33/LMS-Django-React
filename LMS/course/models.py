@@ -99,11 +99,20 @@ class Quiz(Base):
 
         return question_list
 
-    def calculate_score(self, theUser):
-        qur = self.attempts.filter(user = theUser)
-        if qur.exists() == True and qur.filter(score = None).count() == 0:
-            if not self.rule or self.rule == 'Latest Attempt':
-                pass  #Need Grade model
+    def calculate_score(self, attempts):
+        if not self.rule or self.rule == 'Latest Attempt':
+            return attempts.last().score
+        
+        if attempts.filter(score = None).count() == 0:
+            scores = map(lambda attempt: attempt.score, attempts.all())
+
+            if self.rule == 'Highest Attempt':
+                return max(scores)
+            else: 
+                #Average of Attempts
+                return (sum(scores) / attempts.count()) 
+        else:
+            return None
 
     
 
@@ -183,16 +192,19 @@ class Attempt(Base):
         seconds = duration.seconds
         return timedelta(days=0, seconds=seconds)
 
-    def calculate_score(self):
-        for sub_attempt in self.questions.all():
-             sub_attempt.calculate_score()
-             
+    def calculate_score(self, grader = None):     
         if self.questions.filter(score = None).count() == 0:
             sum = self.questions.first().score
-            for sub_attempt in self.questions.all():
+            for sub_attempt in self.questions.all()[1:]:
                 sum += sub_attempt.score
+
+            if self.score == None or self.score != sum:    
                 self.score = sum
-            self.save()
+                g, _ = Grade.objects.get_or_create(quiz = self.quiz, student = self.user)
+                g.grader = grader
+                g.save()
+                self.save(update_fields=['score'])
+
     
 
 class SubAttempt(models.Model):

@@ -1,0 +1,157 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="section">
+    <h5>{{quiz.cater}}</h5>
+   <h6>{{ quiz.title }}</h6>
+   
+   <div class="table-responsive mt-4">
+        <table class="table table-hover table-center mb-0 datatable">
+            <tbody>
+                <tr>
+                    {% if attempter.user_type == 1|to_str %}
+                    <td>Instructor </td>
+                    {% elif attempter.user_type == 2|to_str %}
+                    <td>ID: {{attempter.staff.staff_id}}</td>
+                    {% else %}
+                    <td>ID: {{attempter.student.student_id}}</td>
+                    {% endif %}
+                    <td>
+                        <h2 class="table-avatar">
+                            <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{attempter.avatar}}" alt="User Image"></a>
+                            <a href="#">{{attempter.get_name}}</a>
+                        </h2>
+                    </td>
+                    <td>Email: {{attempter.email}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+   <div class="divider"></div>
+
+    <div class="row">
+        <div class="col s3">
+            <h5>Due:</h5>
+            <p>{{ quiz.due_date }}</p>
+        </div>
+        <div class="col s3">
+            {% if quiz.num_attempts %}
+                <h5>Allowed Attempts:</h5>
+                <h6>{{ quiz.num_attempts }}</h6>
+            {% else %}
+                <h5>Unlimited Attempts</h5>
+            {% endif %}
+            {% if quiz.rule %} {{quiz.rule}} {% endif %}
+        </div>
+        <div class="col s3">
+            <h5>Attempt:</h5>
+            <h5>{{num}}</h5>
+        </div>
+
+        <div class="col s3">
+            <h5>Completed at: {{ attempt.completed_time }}</h5>
+            <p>Total time taken: {{ attempt.time_taken }}</p>
+        </div>
+    </div>
+    
+    <div class="col s12">
+        {{ quiz.description | safe }}  
+    </div>
+    <div class="divider"></div>
+
+    <form method="post" role="form" class="col s12">
+        {% csrf_token %}
+        <div class="col-auto text-right float-right ml-auto">
+            <a href="{% url 'course:grader_view_attempts' quiz_pk=quiz.pk pk=attempter.pk %}" class="btn waves-effect waves-light mt-3">
+                Back
+            </a>
+        </div>
+
+        <br> <br>
+        <div class="col s12">          
+            {% for sub_attempt in attempt.questions.all %}
+            <div class="col s12">
+                <br>
+                <p>Question {{ sub_attempt.question.num }} ({{sub_attempt.question.score}}pts):</p>
+               
+                <p> {{ sub_attempt.question.content | safe}} </p>
+            </div>
+
+            {% if sub_attempt.question.cater == 'Typing Answer' %}
+                {% if sub_attempt.score == None %}
+                <div class="col-12 col-sm-6 text-warning">Need Graded</div>
+                {% else %}
+                <div class="col-12 col-sm-6 text-success">Grade: {{sub_attempt.score}}</div>
+                {% endif %}
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group row">
+                        <input type="number" step="0.01" 
+                        name="q_{{forloop.counter0}}" placeholder="Give/Update Grade" style="width: 250px;">
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="10" cols="80"
+                        readonly>{{sub_attempt.ans_text|safe}}</textarea>
+                    </div>
+                </div>
+            {% else %}
+
+                {% for answer in sub_attempt.get_showed_answers %}
+                {% with ans_check=sub_attempt|check_selected:answer.id %}
+                <div class="input col s12">
+                    <label>
+                        <input {% if sub_attempt.question.cater == 'One Choice' %}
+                        type="radio" {% else %} type="checkbox" {% endif %}
+                        {% if ans_check == True %}checked{% endif %} disabled />
+                        <span {% if ans_check == True %}
+                        class="{% if answer.is_correct == True %}text-success
+                        {% else %}text-warning{% endif %}" {% endif %}>{{ answer.content | safe }}</span>
+
+                        {% if answer.is_correct == True %}
+                        <span class="ml-3 text-success"> 
+                            <strong> Correct </strong>
+                        </span>
+                        {% endif %}
+                    </label>          
+                </div>
+                {% endwith %}
+                {% endfor %}
+
+                <div class="col-12 col-sm-6 text-success">Grade: {{sub_attempt.score}} pts</div>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group row">
+                        <input type="number" step="0.01" 
+                        name="q_{{forloop.counter0}}" placeholder="Give/Update Grade" style="width: 250px;">
+                    </div>
+                </div>                
+            {% endif %}
+
+
+            <br><br>
+            {% endfor %}
+
+            
+            <div class="col s12">
+                <button type="submit" class="btn waves-effect waves-light" name="method" value="submit">
+                Grade
+                </button>
+                
+                <a href="{% url 'course:grader_view_attempts' quiz_pk=quiz.pk pk=attempter.pk %}" class="btn waves-effect waves-light ml-3">
+                    Back
+                </a>
+            </div>
+        </div>
+
+    </form>
+    
+    
+</div>
+
+
+<br><br><br>
+{% endblock %}

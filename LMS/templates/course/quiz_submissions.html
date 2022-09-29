@@ -1,0 +1,86 @@
+{% extends 'index.html' %}
+{% load custom_tags %}
+{% block content %} 
+
+<div class="content container-fluid">
+    <div class="page-header">
+       <div class="row align-items-center">
+          <div class="col">
+             <h3 class="page-title"> Quiz {{quiz.title}}</h3>
+             <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Submissions</li>
+             </ul>
+          </div>
+          <div class="col-auto text-right float-right ml-auto">
+             <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Download</a>
+          </div>
+       </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
+           <div class="card card-table">
+              <div class="card-body">
+                 <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0 datatable">
+                       <tbody>
+                        <thead>
+                            <tr>
+                               <th>ID</th>
+                               <th>Name</th>
+                               <th>Email</th>
+                               <th>Attempts Taken</th>
+                               <th>Last Submission Time</th>
+                               <th>Grade</th>
+                            </tr>
+                         </thead>
+                         {% for u in users %}
+                          <tr>
+                            <td>{% if u.user_type == 3|to_str %}{{u.student.student_id}}
+                                {% else %}{{u.staff.staff_id}} {% endif %}
+                            </td>
+                            <td>
+                                <h2 class="table-avatar">
+                                   <a href="{% url 'course:grader_view_attempts' quiz_pk=quiz.pk pk=u.pk %}" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{u.avatar}}" alt="User Image"></a>
+                                   <a href="{% url 'course:grader_view_attempts' quiz_pk=quiz.pk pk=u.pk %}">{{u.get_name}}</a>
+                                </h2>
+                             </td>
+                             <td>{{u.email}}</td>
+
+                             {% with attempts=quiz|get_quiz_attempts:u %}
+                             <td> {{attempts.count}} {% if attempts.count == 1 %}attempt{% else %}attempts{% endif %} </td>
+
+                             {% with grade=quiz|get_quiz_grade:u %}
+                             <td>
+                                <a href="{% url 'course:grader_view_attempts' quiz_pk=quiz.pk pk=u.pk %}">
+                                Last at: {{attempts.last.completed_time}}
+                                </a>
+                            </td>
+                              
+                            <td>
+                                <a href="{% url 'course:grader_view_attempts' quiz_pk=quiz.pk pk=u.pk %}">
+                                 {% if grade == None or not grade.point %}
+                                    Not Yet Grade
+                                 {% else %}
+                                    {{grade.point}} pts
+                                 {% endif %}
+                                </a>
+                            </td>
+
+                             {% endwith %}
+                             {% endwith %}
+                          </tr>
+                          {% endfor %}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+
+ </div>
+
+
+{% endblock %}

@@ -19,6 +19,7 @@
             {% else %}
                 <h5>Unlimited Attempts</h5>
             {% endif %}
+            {% if quiz.rule %} {{quiz.rule}} {% endif %}
         </div>
         <div class="col s4">
             {% if quiz.time_limit %}

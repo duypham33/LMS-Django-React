@@ -1,0 +1,85 @@
+{% extends 'index.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+
+<div class="section">
+    <h5>{{ quiz.cater }}</h5>
+    <h4>{{ quiz.title }}</h4>
+   <div class="divider"></div>
+
+    <div class="col s12 mt-3 mb-3">
+        {{ quiz.description | safe }}
+        <div class="divider"></div>
+    </div>
+    <div class="col s12 mt-3 mb-3">
+        Availability: {% if quiz.closed == True %} Closed {% else %} Open {% endif %}
+        <div class="divider mt-3"></div>
+    </div>
+
+    <div class="col s12 h6 text-muted mt-3">
+        {% if quiz.time_limit %}
+        Time limit: {{quiz.time_limit}} per attempt
+        {% else %}
+        No Time Limit
+        {% endif %}
+
+        <span class="ml-5"> <strong>Due </strong>{{quiz.due_date.date}} at {{quiz.due_date.time}} </span>
+    </div>
+    <div class="col s12 h5 mt-2">
+        {% if quiz.num_attempts == 1 %}
+            Only one attempt allowed!
+        {% elif quiz.num_attempts > 1 %}
+            Allowed {{quiz.num_attempts}} attempts taken. {% if quiz.rule %} {{quiz.rule}}! {% endif %} 
+        {% else %}
+            This assessment has unlimited attempts. {% if quiz.rule %} {{quiz.rule}}! {% endif %}
+        {% endif %}
+    </div>
+
+    <a class="btn btn-primary mt-4 mr-3 ml-3 mb-3" href="{% url 'course:quiz_submissions' pk=quiz.pk %}">
+        Back
+    </a>
+
+    <div class="table-responsive mt-4">
+        <table class="table table-hover table-center mb-0 datatable">
+            <tbody>
+                <tr>
+                    {% if attempter.user_type == 1|to_str %}
+                    <td>Instructor </td>
+                    {% elif attempter.user_type == 2|to_str %}
+                    <td>ID: {{attempter.staff.staff_id}}</td>
+                    {% else %}
+                    <td>ID: {{attempter.student.student_id}}</td>
+                    {% endif %}
+                    <td>
+                        <h2 class="table-avatar">
+                            <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{attempter.avatar}}" alt="User Image"></a>
+                            <a href="#">{{attempter.get_name}}</a>
+                        </h2>
+                    </td>
+                    <td>Email: {{attempter.email}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="ml-3 mt-4"> 
+        {% for a in attempts.all %}
+            <div class="mt-3 h5">
+                <a href="{% url 'course:grade_quiz_attempt' pk=a.pk %}"> 
+                    Attempt {{a.num}} <span class="ml-2 text-success">{{a|get_attempt_score}}</span>
+                    <span class="ml-4 text-muted">Completed at: {{a.completed_time}}</span>
+                </a>
+            </div>
+        {% endfor %}
+        {% with grade=quiz|get_quiz_grade:attempter %}
+        {% if grade and grade.point %}
+            <p class="mt-3 h5">Final Grade: {{grade.point}} pts/{{quiz.score}} pts</p>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+
+<br><br><br>
+
+{% endblock %}

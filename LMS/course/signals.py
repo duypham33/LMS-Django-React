@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from app.models import Notification
 from course.models import Module, PostFileContent, Attempt, Quiz, SubAttempt, Assignment, AssignmentFile, Grade
 import os
-
+from decimal import Decimal
 
 
 @receiver(post_save, sender=Module)
@@ -80,12 +80,49 @@ def delete_assignment_files_in_media(sender, instance, **kwargs):
 @receiver(post_save, sender=Grade)
 def graded(sender, instance, **kwargs):
     update_fields = kwargs.pop('update_fields', None)
-    if update_fields and 'point' in update_fields:
-        _sender = instance.grader
-        course = instance.submission.assignment.module.course
+    if update_fields and 'point' in update_fields:   
+        if instance.submission:
+            course = instance.submission.assignment.module.course
+            title = instance.submission.assignment.title
+        
+        else:
+            course = instance.quiz.module.course
+            title = instance.quiz.title
 
+        _sender = instance.grader if instance.grader else course.instructor.user
         notice = Notification.objects.create(title=f'Your assignment is graded in {course}!',
-        content=f'{_sender} graded assignment {instance.submission.assignment.title} in {course}!',
+        content=f'{_sender} graded assignment {title} in {course}!',
         sender=_sender, from_course=course)
 
         notice.sendTo(instance.student, showed_on_inbox=f'graded your assignment in ')
+
+
+
+
+@receiver(post_save, sender=Attempt)
+def update_attempt_score(sender, instance, **kwargs):
+    update_fields = kwargs.pop('update_fields', None)
+    if update_fields and 'status' in update_fields:
+        if instance.status == 'Completed':
+            for sub_attempt in instance.questions.all():
+                sub_attempt.calculate_score()
+
+            instance.calculate_score()
+
+
+@receiver(post_save, sender=Attempt)
+def update_quiz_totalscore(sender, instance, **kwargs):
+    update_fields = kwargs.pop('update_fields', None)
+    if update_fields and 'score' in update_fields:
+        if instance.score:
+            user = instance.user
+            quiz = instance.quiz
+            attempts = user.attempts.filter(quiz = quiz, status = 'Completed')
+            
+            score = quiz.calculate_score(attempts)
+            if score:
+                g, _ = Grade.objects.get_or_create(quiz = quiz, student = user)
+                
+                if g.point != score:
+                    g.point = Decimal(score)
+                    g.save(update_fields=['point'])

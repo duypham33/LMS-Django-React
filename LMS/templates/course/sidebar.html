@@ -1,4 +1,5 @@
 {% load active_link_tags %}
+{% load custom_tags %}
 <li class="menu-title">
     <span>Course Menu</span>
  </li>
@@ -12,16 +13,18 @@
     <a href="{% url 'course:module' pk=course.pk %}"><i class="fa fa-book"></i> <span> Modules </span></a>
  </li>
  <li>
-    <a href="#"><i class="fa fa-question-circle"></i> <span> Quizzes </span></a>
+    <a href="{% url 'course:view_quizzes' pk=course.pk %}"><i class="fa fa-question-circle"></i> <span> Quizzes </span></a>
  </li>
  <li>
     <a href="{% url 'course:view_assignments' pk=course.pk %}"><i class="fa fa-tasks"></i> 
       <span> Assignments </span>
    </a>
  </li>
+ {% if user.user_type == 3|to_str %}
  <li>
-    <a href="#"><i class="fa fa-marker"></i> <span> Grades </span></a>
+    <a href="{% url 'course:view_grades' pk=course.pk %}"><i class="fa fa-marker"></i> <span> Grades </span></a>
  </li>
+ {% endif %}
  <li>
     <a href="#"><i class="fa fa-graduation-cap"></i> <span> Disscusions </span></a>
  </li>

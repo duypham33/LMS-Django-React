@@ -1,0 +1,70 @@
+{% extends 'index.html' %}
+{% load custom_tags %}
+{% block content %} 
+
+<div class="content container-fluid">
+    <div class="page-header">
+       <div class="row align-items-center">
+          <div class="col">
+             <h3 class="page-title"> Quizzes </h3>
+             <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Quizzes</li>
+             </ul>
+          </div>
+          <div class="col-auto text-right float-right ml-auto">
+             <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Download</a>
+          </div>
+       </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
+           <div class="card card-table">
+              <div class="card-body">
+                 <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0 datatable">
+                       <tbody>
+                         {% for quiz in quizzes %}
+                          <tr>
+                             <td>
+                                <h2 class="table-avatar">
+                                    <a href="{% url 'course:quiz_detail' pk=quiz.pk %}">
+                                        <i class="fa fa-tasks mr-2"></i> {{ quiz.title }}
+                                    </a>
+                                </h2>
+                             </td>
+                             <td>{% if quiz.closed == False %} Open {% else %} Closed {% endif %}</td>
+                             <td>Due {{quiz.due_date.date}} at {{quiz.due_date.time}}</td>
+                             <td>Total: {{quiz.score}} pts</td>
+    
+                             {% if user.user_type == 3|to_str %}
+                             {% with grade=quiz|get_quiz_grade:user %}
+                             <td class="text-right">
+                                <a href="{% url 'course:quiz_detail' pk=quiz.pk %}">
+                                    {% if quiz|is_submitted:user == False %}
+                                        Not Yet Submitted
+                                    {% elif grade == None or not grade.point %}
+                                        Not Yet Graded
+                                    {% else %}
+                                       {{grade.point}} pts
+                                    {% endif %}
+                                </a>
+                             </td>
+                             {% endwith %}
+                             {% endif %}
+                             
+                          </tr>
+                          {% endfor %}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+
+ </div>
+
+
+{% endblock %}

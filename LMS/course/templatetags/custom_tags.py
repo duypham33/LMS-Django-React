@@ -1,6 +1,6 @@
 
 from django import template
-from course.models import Submission
+from course.models import Submission, Grade, Attempt
 
 register = template.Library()
 #This function is used in 'resume_quiz.html' to check whether an answer has been chosen
@@ -74,3 +74,25 @@ def to_str(num):
 def last_subx(assignment, user):
 	return Submission.objects.filter(assignment = assignment, user = user).last()
 
+
+@register.filter()
+def is_submitted(quiz, user):
+	return Attempt.objects.filter(quiz = quiz, user = user).exists()
+
+
+
+@register.filter()
+def get_quiz_grade(quiz, user):
+    return Grade.objects.filter(quiz = quiz, student = user).first()
+
+
+@register.filter()
+def get_quiz_attempts(quiz, user):
+    return Attempt.objects.filter(quiz = quiz, user = user)
+
+
+@register.filter()
+def get_quizOrAssignment(grade):
+	if grade.quiz:
+		return grade.quiz
+	return grade.submission.assignment

@@ -8,6 +8,8 @@ from django.contrib import messages
 import os
 from datetime import datetime, timezone, timedelta
 from app.models import User
+from decimal import Decimal
+from django.db.models import Q
 # Create your views here.
 
 
@@ -630,7 +632,6 @@ def take_quiz(request, pk):
         method = request.POST.get("method")
         if method == 'submit':
             cur_attempt.completed_time = datetime.now(timezone.utc)
-            cur_attempt.status = 'Completed'
             cur_attempt.save()
 
         if cur_attempt.questions.count() == 0:
@@ -661,6 +662,10 @@ def take_quiz(request, pk):
                     answers = [Answer.objects.get(id = id) for id in answers_id]
                     sub_attempt.chosen_answers.set(answers, clear = True)
                 sub_attempt.save()
+
+        if method=='submit':
+            cur_attempt.status = 'Completed'
+            cur_attempt.save(update_fields=['status'])  #Useful for signal to call calculate_score()
                     
                 
         msg = f'Your {quiz.cater} is submited successfully!' if method=='submit' else 'Your attempt is saved!'
@@ -682,9 +687,6 @@ def take_quiz(request, pk):
 def view_attempt(request, pk, num):
     quiz = Quiz.objects.get(pk = pk)
     cur_attempt = quiz.attempts.filter(user = request.user, num = num).first()
-    if cur_attempt.score == None:
-        cur_attempt.calculate_score()
-
     course = quiz.module.course
     questions = cur_attempt.get_questions()
     
@@ -899,7 +901,7 @@ def submission_detail(request, pk, num):
 @login_required(login_url='login/')
 def view_assignments(request, pk):
     course = Course.objects.get(pk = pk)
-    assignments = Assignment.objects.filter(module__course = course).all()
+    assignments = Assignment.objects.filter(module__course = course).order_by('-date_created').all()
 
     context = {'course_mode': True, 'course': course, 'assignments': assignments}
     return render(request, 'course/view_assignments.html', context = context)
@@ -915,3 +917,73 @@ def view_submissions(request, pk):
     return render(request, 'course/view_submissions.html', context = context)
 
 
+
+
+@login_required(login_url='login/')
+def view_quizzes(request, pk):
+    course = Course.objects.get(pk = pk)
+    quizzes = Quiz.objects.filter(module__course = course).order_by('-date_created').all()
+
+    context = {'course_mode': True, 'course': course, 'quizzes': quizzes}
+    return render(request, 'course/view_quizzes.html', context = context)
+
+
+@login_required(login_url='login/')
+def quiz_submissions(request, pk):
+    quiz = Quiz.objects.get(pk = pk)
+    course = quiz.module.course
+    users = User.objects.filter(attempts__quiz = quiz).distinct().order_by('-user_type')
+
+    context = {'course_mode': True, 'course': course, 'quiz': quiz , 'users': users}
+    return render(request, 'course/quiz_submissions.html', context = context)
+
+
+
+@login_required(login_url='login/')
+def grader_view_attempts(request, quiz_pk, pk):
+    quiz = Quiz.objects.get(pk = quiz_pk)
+    course = quiz.module.course
+    attempter = User.objects.get(pk = pk)
+    attempts = Attempt.objects.filter(quiz = quiz, user = attempter, status = 'Completed')
+
+    context = {'course_mode': True, 'course': course, 'quiz': quiz , 
+               'attempter': attempter, 'attempts': attempts}
+    return render(request, 'course/grader_view_attempts.html', context = context)
+
+
+@login_required(login_url='login/')
+def grade_quiz_attempt(request, pk):
+    attempt = Attempt.objects.get(pk = pk)
+    quiz = attempt.quiz
+    course = quiz.module.course
+    attempter = attempt.user
+    
+    if request.method == 'POST':
+        for index, sub_attempt in enumerate(attempt.questions.all(), start = 0):
+            score = request.POST.get(f'q_{index}')
+            if score and score != '':
+                sub_attempt.score = Decimal(score)
+                sub_attempt.save(update_fields=['score'])
+
+        attempt.calculate_score(grader = request.user)
+        
+        messages.success(request, f'Grade for {attempter.get_name()} is updated!')
+        return redirect('course:grader_view_attempts', quiz_pk=quiz.pk, pk=attempter.pk)
+            
+    num = attempt.num
+    order = ['', 'st', 'nd', 'rd', 'th']
+    num = str(num) + order[min(num,4)]
+
+    context = {'course_mode': True, 'course': course, 'quiz': quiz,
+        'attempt': attempt, 'num': num, 'attempter': attempter}
+    return render(request, 'course/grade_quiz_attempt.html', context = context)
+
+
+@login_required(login_url='login/')
+def view_grades(request, pk):
+    course = Course.objects.get(pk = pk)
+    grades = request.user.grades.filter(Q(submission__assignment__module__course = course) |
+                                        Q(quiz__module__course = course)).order_by('-date_graded').all()
+    
+    context = {'course_mode': True, 'course': course, 'grades': grades}
+    return render(request, 'course/view_grades.html', context = context)

@@ -50,5 +50,15 @@ urlpatterns = [
 
     path('<int:pk>/view_assignments', views.view_assignments, name='view_assignments'),
     path('assignment/<int:pk>/submissions', views.view_submissions, name='view_submissions'),
+
+    path('<int:pk>/view_quizzes', views.view_quizzes, name='view_quizzes'),
+    path('quiz/<int:pk>/submissions', views.quiz_submissions, name='quiz_submissions'),
+
+    path('quiz/<int:quiz_pk>/attempter/<int:pk>', views.grader_view_attempts, name='grader_view_attempts'),
+    path('attempt/<int:pk>/grade', views.grade_quiz_attempt, name='grade_quiz_attempt'),
+
+    path('<int:pk>/grade', views.view_grades, name='view_grades'),
+
+    
 ]
 

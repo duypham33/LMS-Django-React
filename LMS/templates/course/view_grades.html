@@ -1,0 +1,93 @@
+{% extends 'index.html' %}
+{% load custom_tags %}
+{% block content %} 
+
+<div class="content container-fluid">
+    <div class="page-header">
+       <div class="row align-items-center">
+          <div class="col">
+             <h3 class="page-title"> Grades </h3>
+             <ul class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'app:index' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Grades</li>
+             </ul>
+          </div>
+          <div class="col-auto text-right float-right ml-auto">
+             <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Download</a>
+          </div>
+       </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-sm-12">
+           <div class="card card-table">
+              <div class="card-body">
+                 <div class="table-responsive">
+                    <table class="table table-hover table-center mb-0 datatable">
+                       <tbody>
+                         {% for grade in grades %}
+                         {% with task=grade|get_quizOrAssignment %}
+                          <tr>
+                             <td>
+                                <h2 class="table-avatar">
+                                    <a href="#">
+                                        {% if grade.quiz %}
+                                        <i class="fa fa-rocket mr-2"></i> 
+                                        {% else %}
+                                        <i class="fa fa-tasks mr-2"></i> 
+                                        {% endif %}
+                                        {{ task.title }}
+                                    </a>
+                                </h2>
+                             </td>
+                             <td>Due {{task.due_date.date}} at {{task.due_date.time}}</td>
+                             
+                             
+                             
+                             <td class="text-right">
+                                <a href="#">
+                                    {% if not grade.point %}
+                                        Not Yet Graded
+                                    {% else %}
+                                       {{grade.point}} pts/
+                                       {% if grade.quiz %}
+                                        {{task.score}} pts
+                                        {% else %}
+                                        {{task.point}} pts 
+                                        {% endif %}
+                                    {% endif %}
+                                </a>
+                             </td>
+                            
+                             {% if grade.grader %}
+                             <td class="ml-5">
+                                <h2 class="table-avatar">
+                                   <a href="#" class="avatar avatar-sm mr-2"><img class="avatar-img rounded-circle" src="/{{grade.grader.avatar}}" alt="User Image"></a>
+                                   <a href="#">{{grade.grader.get_name}}</a>
+                                </h2>
+                             </td>
+                             {% else %}
+                                <td class="pl-5">
+                                    <h2 class="table-avatar">
+                                        Auto-System
+                                    </h2>
+                                </td>
+                            {% endif %}
+                             
+                             
+                             
+                          </tr>
+                          {% endwith %}
+                          {% endfor %}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+
+ </div>
+
+
+{% endblock %}

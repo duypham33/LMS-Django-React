@@ -48,6 +48,8 @@
         {% else %}
             This assessment has unlimited attempts.
         {% endif %}
+
+        {% if quiz.rule %} {{quiz.rule}}! {% endif %}
     </div>
 
     {% if owner == True or quiz.closed == False %}
@@ -62,6 +64,12 @@
             View Quiz
         </a>
     {% endif %}
+
+    {% if user.user_type != 3|to_str %}
+        <a class="btn btn-primary mt-4 mr-3 ml-3 mb-3" href="{% url 'course:quiz_submissions' pk=quiz.pk %}">
+            Submissions
+        </a>
+    {% endif %}
     {% endif %}
 
     <div class="ml-3 mt-4"> 
@@ -69,9 +77,16 @@
             <div class="mt-3 h5">
                 <a href="{% url 'course:view_attempt' pk=quiz.pk num=a.num %}"> 
                     Attempt {{a.num}} <span class="ml-2 text-success">{{a|get_attempt_score}}</span>
+                    <span class="ml-4 text-muted">Completed at: {{a.completed_time}}</span>
                 </a>
             </div>
         {% endfor %}
+
+        {% with grade=quiz|get_quiz_grade:user %}
+        {% if grade and grade.point %}
+            <p class="mt-3 h5">Final Grade: {{grade.point}} pts/{{quiz.score}} pts</p>
+        {% endif %}
+        {% endwith %}
     </div>
 </div>
 
