@@ -1,3 +1,4 @@
+from unicodedata import category
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 # import datetime
@@ -5,6 +6,8 @@ from app.models import User, Session_Year, Subject, Course, Leave, AssocUserNoti
 from django.contrib import messages
 from student.models import Student
 from staff.models import Staff
+from decimal import Decimal
+from commerce.models import Category
 # Create your views here.
 
 @login_required(login_url='login/')
@@ -56,12 +59,16 @@ def add_subject(request):
 def add_course(request):
     subjects = Subject.objects.all()
     sessions = Session_Year.objects.all()
+    categories = Category.objects.all()
 
     if request.method == 'POST':
         title = request.POST.get('title')
         coursenum = request.POST.get('coursenum')
         subject_id = request.POST.get('subject')
+        cats = request.POST.getlist('categories')
         session_id = request.POST.get('session')
+        price = request.POST.get('price').replace('$', '').strip()
+        discount = request.POST.get('discount').replace('%', '').strip()
         pic = request.FILES.get('pic', None)
         
         if title and title != '':
@@ -71,10 +78,22 @@ def add_course(request):
             f'You have already created the course \'{title}\'! Please, try to create a new one!')
             except:
                 if coursenum and 0 < len(coursenum) < 6:
-                    Course.objects.create(title = title, coursenum = coursenum, subject_id = subject_id,
-                    session_id = session_id, instructor = request.user.teacher, pic=pic)
-                    messages.success(request, f'The course \'{title}\' is created!')
+                    price = 0 if not price or price == '' else Decimal(price)
+                    discount = 0 if not discount or discount == '' else int(discount)
 
+                    c = Course.objects.create(title = title, coursenum = coursenum, subject_id = subject_id,
+                    session_id = session_id, instructor = request.user.teacher, 
+                    price = price, discount = discount)
+
+                    if pic is not None:
+                        c.pic = pic
+                        c.save()
+
+                    if cats != [] and cats!=['none']:
+                        cats = [Category.objects.get(id = int(id)) for id in cats if id != 'none']
+                        c.categories.set(cats)
+
+                    messages.success(request, f'The course \'{title}\' is created!')
                     return redirect('teacher:add_course')
 
         else:
@@ -85,7 +104,8 @@ def add_course(request):
         elif len(coursenum) > 5:
             messages.warning(request, 'Course number must not have more than 5 digits!')
         
-    return render(request, 'teacher/add_course.html', {'subjects': subjects, 'sessions': sessions})
+    context = {'subjects': subjects, 'sessions': sessions, 'categories': categories}
+    return render(request, 'teacher/add_course.html', context = context)
 
 
 
@@ -213,6 +233,8 @@ def update_course(request, pk):
         title = request.POST.get('title')
         pic = request.FILES.get('pic', None)
         session_id = request.POST.get('session')
+        price = request.POST.get('price').replace('$', '').strip()
+        discount = request.POST.get('discount').replace('%', '').strip()
         staff_list = request.POST.getlist('staffs')
         
         if not coursenum or coursenum == "" or len(coursenum) > 5:
@@ -223,6 +245,11 @@ def update_course(request, pk):
             course.subject_id = subj_id
             course.coursenum = coursenum
             course.title = title
+            
+            if price and price != '':
+                course.price = Decimal(price)
+            if discount and discount != '':
+                course.discount = int(discount)
             if pic:
                 course.pic = pic
             

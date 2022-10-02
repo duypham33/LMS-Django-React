@@ -1,4 +1,5 @@
 
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from datetime import datetime, timezone
@@ -75,6 +76,7 @@ class Course(DateBase):
     coursenum = models.CharField(max_length=5)
     subject = models.ForeignKey(Subject, related_name='courses' ,
                              on_delete=models.SET_NULL, blank=True, null=True)
+    categories = models.ManyToManyField(to = 'commerce.Category', related_name = 'courses')
     syllabus = RichTextField()
     pic = models.ImageField(upload_to='media/course_pic', 
                                default='media/course_pic/default.png')
@@ -84,6 +86,9 @@ class Course(DateBase):
     
     instructor = models.ForeignKey(to = 'teacher.Teacher', related_name='courses', 
                              on_delete=models.SET_NULL, blank=True, null=True)
+    price = models.DecimalField(max_digits = 10, decimal_places = 2, null = True, blank = True, default = 0)
+    discount = models.IntegerField(null = True, blank = True, default = 0)
+    slug = models.SlugField(default = '', max_length = 200, null = True, blank = True)
 
     def __str__(self):
         if self.subject:
@@ -92,6 +97,12 @@ class Course(DateBase):
 
     class Meta:
         ordering = ['subject', 'coursenum']
+
+    def final_price(self):
+        if self.discount == 0:
+            return self.price
+        price = self.price * (100 - self.discount) / 100
+        return price
 
 
 class Session_Year(models.Model):

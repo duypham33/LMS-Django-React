@@ -33,6 +33,20 @@
                         </select>
                     </div>
                 </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Categories</label>
+                        <select class="form-control" name="categories" multiple>
+                            <option value="none">----</option>
+                            {% for c in categories %}
+                                <option value="{{c.id}}">{{c}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <br>
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
                         <label>Session</label>
@@ -44,6 +58,23 @@
                     </div>
                 </div>
 
+
+                <br>
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" step="step="0.1" name="price" placeholder="$0">
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                        <label>Discount (%) - Put 0 if no discount </label>
+                        <input type="number" name="discount" placeholder="0%">
+                    </div>
+                </div>
+                
+
                 <div class="col-12 col-sm-6">
                     <div class="form-group">
                         <label>Course Picture</label>
@@ -51,6 +82,7 @@
                     </div>
                 </div>
 
+                <br>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">Create</button>
                 </div>
@@ -59,5 +91,5 @@
        </div>
     </div>
  </div>
-
+ <br><br>
 {% endblock %}

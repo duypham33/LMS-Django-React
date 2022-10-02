@@ -1,6 +1,6 @@
 
 from django import template
-from course.models import Submission, Grade, Attempt
+from course.models import Submission, Grade, Attempt, Page
 
 register = template.Library()
 #This function is used in 'resume_quiz.html' to check whether an answer has been chosen
@@ -96,3 +96,8 @@ def get_quizOrAssignment(grade):
 	if grade.quiz:
 		return grade.quiz
 	return grade.submission.assignment
+
+
+@register.filter()
+def calculate_lectures(course):
+	return Page.objects.filter(module__course = course).count()
