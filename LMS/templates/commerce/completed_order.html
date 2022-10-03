@@ -1,0 +1,107 @@
+{% extends 'commerce/base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+
+<!-- SHOP ORDER COMPLETED
+================================================== -->
+<div class="container py-8 py-lg-11">
+    <div class="row">
+        <div class="col-xl-8 mx-xl-auto">
+            <header class="entry-header">
+                <h1 class="entry-title">Order received</h1>
+            </header>
+
+            <div class="entry-content">
+                <div class="woocommerce">
+                    <div class="woocommerce-order">
+                        <p class="woocommerce-notice woocommerce-notice--success woocommerce-thankyou-order-received">Thank you. Your order has been received.</p>
+
+                        <ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details">
+                            <li class="woocommerce-order-overview__order order">
+                                Order ID:
+                                <strong>{{order.order_id}}</strong>
+                            </li>
+
+                            <li class="woocommerce-order-overview__date date">
+                                Date:
+                                <strong>{{order.date_paid}}</strong>
+                            </li>
+
+                            <li class="woocommerce-order-overview__total total">
+                                Total:
+                                <strong><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{order.subtotal}}</span></strong>
+                            </li>
+
+                            <li class="woocommerce-order-overview__payment-method method">
+                                Payment method:
+                                <strong>{{order.payment_method}}</strong>
+                            </li>
+                        </ul>
+
+                        <section class="woocommerce-order-details">
+                            <h2 class="woocommerce-order-details__title">Order details</h2>
+                            <table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+                                <thead>
+                                    <tr>
+                                        <th class="woocommerce-table__product-name product-name">Course</th>
+                                        <th class="woocommerce-table__product-table product-total">Total</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {% for item in order.items.all %}
+                                    <tr class="woocommerce-table__line-item order_item">
+                                        <td class="woocommerce-table__product-name product-name">
+                                            <a href="#">{{item.course}}: {{item.course.title}}</a>
+                                        </td>
+
+                                        <td class="woocommerce-table__product-total product-total">
+                                            <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{item.course.final_price}}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+
+                                <tfoot>
+                                    <tr>
+                                        <th scope="row">Subtotal:</th>
+                                        <td><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{order.subtotal}}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Payment method:</th>
+                                        <td>{{order.payment_method}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Total:</th>
+                                        <td><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{order.subtotal}}</span></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </section>
+
+                        <section class="woocommerce-customer-details">
+                            <h2 class="woocommerce-column__title">Billing address</h2>
+                            <address>
+                                {{order.first_name}} {{order.last_name}}<br>{{order.street_address}}<br>{{order.city}} {{order.postcode}}<br>{{order.country}}
+                                <p class="woocommerce-customer-details--phone">{{order.phone}}</p>
+                                <p class="woocommerce-customer-details--email">{{order.email}}</p>
+                            </address>
+                        </section>
+
+                        {% if order.additional_info %}
+                        <section class="woocommerce-customer-details">
+                            <h2 class="woocommerce-column__title">Additional Message</h2>
+                            <p>{{order.additional_info}}</p>
+                        </section>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br><br>
+
+{% endblock %}

@@ -5,7 +5,7 @@ from .models import User, Course, Notification, AssocUserNotice, Reply
 from teacher.models import Teacher
 from student.models import Student
 from staff.models import Staff
-
+from commerce.models import Cart
 
 
 # @receiver(pre_save, sender=User)
@@ -19,6 +19,8 @@ def create_user_with_type(sender, instance, created, **kwargs):
     if created:
         password = instance.password
         instance.set_password(password)
+
+        Cart.objects.create(user = instance)
 
         if instance.user_type == '1':
             Teacher.objects.create(user = instance)

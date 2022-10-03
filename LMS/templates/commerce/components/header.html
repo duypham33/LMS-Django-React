@@ -385,6 +385,8 @@
                     <a class="nav-link dropdown-toggle px-xl-4 text-gigas" id="navbarCourses" data-bs-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">
                         Courses
                     </a>
+
+                    {% if user.get_role.courses.count > 0 %}
                     <div class="dropdown-menu border-xl shadow-none dropdown-menu-lg" aria-labelledby="navbarCourses">
                         <div class="row gx-0">
                             <div class="col-md-4">
@@ -394,114 +396,42 @@
                                 </h5>
 
                                 <!-- List -->
-                                <a class="dropdown-item" href="course-list-v1.html">
-                                    Courses List v1
+                                {% for c in user.get_role.courses.all %}
+                                <a class="dropdown-item" href="{% url 'course:home' pk=c.pk %}">
+                                    {{c}}: {{c.title}}
                                 </a>
-                                <a class="dropdown-item" href="course-list-v2.html">
-                                    Courses List v2
-                                </a>
-                                <a class="dropdown-item" href="course-list-v3.html">
-                                    Courses List v3
-                                </a>
-                                <a class="dropdown-item" href="course-list-v4.html">
-                                    Courses List v4
-                                </a>
-                                <a class="dropdown-item" href="course-list-v5.html">
-                                    Courses List v5
-                                </a>
-                                <a class="dropdown-item mb-5" href="course-list-v6.html">
-                                    Courses List v6
-                                </a>
+                                {% endfor %}
                             </div>
-                            <div class="col-md-4">
-                                <!-- Heading -->
-                                <h5 class="dropdown-header">
-                                    Courses Single
-                                </h5>
-
-                                <!-- List -->
-                                <a class="dropdown-item" href="course-single-v1.html">
-                                    Courses Single v1
-                                </a>
-                                <a class="dropdown-item" href="course-single-v2.html">
-                                    Courses Single v2
-                                </a>
-                                <a class="dropdown-item" href="course-single-v3.html">
-                                    Courses Single v3
-                                </a>
-                                <a class="dropdown-item" href="course-single-v4.html">
-                                    Courses Single v4
-                                </a>
-                                <a class="dropdown-item mb-5" href="course-single-v5.html">
-                                    Courses Single v5
-                                </a>
-                            </div>
-                            <div class="col-md-4">
-                                <!-- Heading -->
-                                <h5 class="dropdown-header">
-                                    Lesson Single
-                                </h5>
-
-                                <!-- List -->
-                                <a class="dropdown-item" href="lesson-single-v1.html">
-                                    Lesson Single v1
-                                </a>
-                                <a class="dropdown-item mb-5" href="lesson-single-v2.html">
-                                    Lesson Single v2
-                                </a>
-
-                                <!-- Heading -->
-                                <h5 class="dropdown-header">
-                                    Instructors
-                                </h5>
-
-                                <!-- List -->
-                                <a class="dropdown-item" href="instructors-list-v1.html">
-                                    Instructors List v1
-                                </a>
-                                <a class="dropdown-item" href="instructors-list-v2.html">
-                                    Instructors List v2
-                                </a>
-                                <a class="dropdown-item mb-5 mb-lg-0" href="instructors-single.html">
-                                    Instructors Single
-                                </a>
-                            </div>
+                            
                         </div>
                     </div> <!-- / .row -->
+                    {% endif %}
                 </li>
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle px-xl-4 text-gigas" id="navbarShop" data-bs-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">
-                        Shop
+                        Cart
                     </a>
                     <ul class="dropdown-menu border-xl shadow-none" aria-labelledby="navbarShop">
                         <li class="dropdown-item">
-                            <a class="dropdown-link" href="shop-cart.html">
-                                Shop Cart
+                            <a class="dropdown-link" href="{% url 'commerce:view_cart' %}">
+                                My Cart
                             </a>
                         </li>
                         <li class="dropdown-item">
-                            <a class="dropdown-link" href="shop-checkout.html">
-                                Shop Checkout
+                            <a class="dropdown-link" href="{% url 'commerce:checkout' %}">
+                                Cart Checkout
                             </a>
                         </li>
+                        
                         <li class="dropdown-item">
-                            <a class="dropdown-link" href="shop-list.html">
-                                Shop List
-                            </a>
-                        </li>
-                        <li class="dropdown-item">
-                            <a class="dropdown-link" href="shop-single.html">
-                                Shop Single
-                            </a>
-                        </li>
-                        <li class="dropdown-item">
-                            <a class="dropdown-link" href="shop-order-completed.html">
-                                Shop Order Completed
+                            <a class="dropdown-link" href="{% url 'commerce:view_orders' %}">
+                                Completed Orders
                             </a>
                         </li>
                     </ul>
                 </li>
+
             </ul>
         </div>
 
@@ -519,7 +449,12 @@
             <li class="nav-item border-0 px-1 px-md-3">
                 <!-- Button trigger cart modal -->
                 <a href="#" class="nav-link d-flex p-3 bg-white-all rounded-circle position-relative text-gigas icon-xs" data-bs-toggle="modal" data-bs-target="#cartModal">
-                    <span class="badge badge-gigas text-white rounded-circle fw-bold badge-float mt-n4 ms-n4 px-0 w-16 right-0" style="font-size: 8px;">2</span>
+                    {% if user.cart.items and user.cart.items.count > 0 %}
+                    <span class="badge badge-gigas text-white rounded-circle fw-bold badge-float mt-n4 ms-n4 px-0 w-16 right-0" style="font-size: 8px;">
+                        {{user.cart.items.count}}
+                    </span>
+                    {% endif %}
+                    
                     <!-- Icon -->
                     <svg width="13" height="15" viewBox="0 0 13 15" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.2422 3.51562H10.4567C10.2239 1.53873 8.53839 0 6.5 0C4.46161 0 2.7761 1.53873 2.54334 3.51562H0.757812C0.434199 3.51562 0.171875 3.77795 0.171875 4.10156V14.4141C0.171875 14.7377 0.434199 15 0.757812 15H12.2422C12.5658 15 12.8281 14.7377 12.8281 14.4141V4.10156C12.8281 3.77795 12.5658 3.51562 12.2422 3.51562ZM6.5 1.17188C7.89113 1.17188 9.04939 2.18716 9.27321 3.51562H3.72679C3.95062 2.18716 5.10887 1.17188 6.5 1.17188ZM11.6562 13.8281H1.34375V4.6875H2.51562V6.44531C2.51562 6.76893 2.77795 7.03125 3.10156 7.03125C3.42518 7.03125 3.6875 6.76893 3.6875 6.44531V4.6875H9.3125V6.44531C9.3125 6.76893 9.57482 7.03125 9.89844 7.03125C10.2221 7.03125 10.4844 6.76893 10.4844 6.44531V4.6875H11.6562V13.8281Z" fill="currentColor"/>

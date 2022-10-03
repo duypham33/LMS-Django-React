@@ -101,3 +101,16 @@ def get_quizOrAssignment(grade):
 @register.filter()
 def calculate_lectures(course):
 	return Page.objects.filter(module__course = course).count()
+
+
+
+@register.filter()
+def is_item_in_cart(cart, course):
+	if not cart.items:
+		return False
+	return cart.items.filter(course = course).exists()
+
+
+@register.filter()
+def check_my_course(user, course):
+	return user.get_role().courses.filter(pk = course.pk).exists()

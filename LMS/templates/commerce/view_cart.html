@@ -1,0 +1,124 @@
+{% extends 'commerce/base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+
+
+<!-- PAGE TITLE
+================================================== -->
+<header class="py-8 py-md-10" style="background-image: none;">
+    <div class="container text-center py-xl-2">
+        <h1 class="display-4 fw-semi-bold mb-0">My Cart</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-scroll justify-content-center">
+                <li class="breadcrumb-item">
+                    <a class="text-gray-800" href="{% url 'commerce:index' %}">
+                        Home
+                    </a>
+                </li>
+                <li class="breadcrumb-item text-gray-800 active" aria-current="page">
+                     Cart
+                </li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Img -->
+    <img class="d-none img-fluid" src="...html" alt="...">
+</header>
+
+
+<!-- SHOP CART
+================================================== -->
+<form action="{% url 'commerce:checkout' %}" method="post">
+    {% csrf_token %}
+    <div class="container pb-6 pb-xl-10">
+        <div class="row">
+            <div id="primary" class="content-area">
+                <main id="main" class="site-main ">
+                    <div class="page type-page status-publish hentry">
+                        <!-- .entry-header -->
+                        <div class="entry-content">
+                            <div class="woocommerce">
+                                <form class="woocommerce-cart-form table-responsive" action="#" method="post">
+                                    <table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents">
+                                        <thead>
+                                            <tr>
+                                                <th>&nbsp;</th>
+                                                <th  class="product-name">Course</th>
+                                                <th class="product-price">Price</th>
+                                                <th class="product-remove">&nbsp;</th>
+                                            </tr>
+                                        </thead>
+        
+                                        <tbody>
+                                            {% if cart.items %}
+                                            {% for i in cart.items.all %}
+                                            <tr class="woocommerce-cart-form__cart-item cart_item">
+                                                <td>
+                                                    <input type="checkbox" name="{{i.pk}}" checked>
+                                                </td>
+                                                <td  class="product-name" data-title="Product">
+                                                    <div class="d-flex align-items-center">
+                                                        <a href="{% url 'commerce:course_detail' pk=i.course.pk %}">
+                                                            <img src="/{{i.course.pic}}" class="attachment-shop_thumbnail size-shop_thumbnail wp-post-image" alt="">
+                                                        </a>
+                                                        <div class="ms-6">
+                                                            <a href="{% url 'commerce:course_detail' pk=i.course.pk %}">
+                                                                {{i.course}}: {{i.course.title}}
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+        
+                                                <td class="product-price" data-title="Price">
+                                                    <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{i.course.final_price}}</span>
+                                                </td>
+        
+                                                <td class="product-remove">
+                                                    <a href="{% url 'commerce:remove_cart_item' pk=i.pk %}" class="remove" aria-label="Remove this item">
+                                                        <i class="far fa-trash-alt text-secondary font-size-sm"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+        
+                                            {% endfor %}
+                                            {% endif %}
+        
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- .entry-content -->
+                    </div>
+                </main>
+            </div>
+            <div id="secondary" class="sidebar" role="complementary">
+                <div class="cart-collaterals">
+                    <div class="cart_totals">
+                        <h2>Cart totals</h2>
+        
+                        <table class="shop_table shop_table_responsive">
+                            <tbody>
+                                <tr class="cart-subtotal">
+                                    <th>Subtotal</th>
+                                    <td data-title="Subtotal"><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{cart.subtotal}}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+        
+                        <div class="wc-proceed-to-checkout">
+                            <button type="submit" class="checkout-button button alt wc-forward" name="submit_from" value="cart">
+                                Proceed to checkout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                
+</form>
+
+{% endblock %}

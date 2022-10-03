@@ -174,8 +174,15 @@
                 </div>
 
                 <div class="d-md-flex">
-                    <button class="btn btn-blue btn-wide mb-4 mb-md-0 me-md-3 flex-grow-1" type="button" name="button">BUY NOW</button>
-                    <button class="btn btn-orange btn-wide mb-4 mb-md-0 ms-md-3 flex-grow-1" type="button" name="button">ENROLL</button>
+                    {% if user.cart|is_item_in_cart:course  %}
+                    <a class="btn btn-blue btn-wide mb-4 mb-md-0 me-md-3 flex-grow-1" type="button" name="button"
+                    href="{% url 'commerce:single_checkout' pk=course.pk %}">CHECKOUT</a>
+                    {% else %}
+                    <a class="btn btn-blue btn-wide mb-4 mb-md-0 me-md-3 flex-grow-1" type="button" name="button"
+                    href="{% url 'commerce:single_checkout' pk=course.pk %}">BUY NOW</a>
+                    <a class="btn btn-orange btn-wide mb-4 mb-md-0 ms-md-3 flex-grow-1" 
+                    type="button" name="button" href="{% url 'commerce:add_cart_item' pk=course.pk %}">ADD TO CART</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

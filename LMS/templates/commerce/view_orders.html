@@ -1,0 +1,108 @@
+{% extends 'commerce/base.html' %}
+{% load static %}
+{% load custom_tags %}
+
+{% block content %}
+
+
+<!-- PAGE TITLE
+================================================== -->
+<header class="py-8 py-md-10" style="background-image: none;">
+    <div class="container text-center py-xl-2">
+        <h1 class="display-4 fw-semi-bold mb-0">My Orders</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-scroll justify-content-center">
+                <li class="breadcrumb-item">
+                    <a class="text-gray-800" href="{% url 'commerce:index' %}">
+                        Home
+                    </a>
+                </li>
+                <li class="breadcrumb-item text-gray-800 active" aria-current="page">
+                     Order
+                </li>
+            </ol>
+        </nav>
+    </div>
+    <!-- Img -->
+    <img class="d-none img-fluid" src="...html" alt="...">
+</header>
+
+
+
+
+<div class="container pb-6 pb-xl-10">
+    <div class="row">
+        <div id="primary" class="content-area">
+            <main id="main" class="site-main ">
+                <div class="page type-page status-publish hentry">
+                    <!-- .entry-header -->
+                    <div class="entry-content">
+                        <div class="woocommerce">
+                            <form class="woocommerce-cart-form table-responsive" action="#" method="post">
+                                <table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents">
+                                    <thead>
+                                        <tr>
+                                            <th  class="product-name">Order ID</th>
+                                            <th  class="product-name">Course</th>
+                                            <th class="product-price">Payment Date</th>
+                                            <th class="product-price">Payment Method</th>
+                                            <th class="product-price">Total</th>
+                                        </tr>
+                                    </thead>
+    
+                                    <tbody>
+                                        {% if orders %}
+                                        {% for i in orders.all %}
+                                    
+                                        <tr class="woocommerce-cart-form__cart-item cart_item">
+                                            <td class="product-price" data-title="Price">
+                                                <a href="{% url 'commerce:order_detail' pk=i.pk %}">
+                                                    <span class="woocommerce-Price-amount amount">{{i.order_id}}</span>
+                                                </a>
+                                            </td>
+    
+                                            <td  class="product-name" data-title="Product">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <a href="{% url 'commerce:order_detail' pk=i.pk %}">
+                                                            {% with count=i.items.count %}
+                                                            {{count}} {% if count == 1 %} Course {% else %} Courses {% endif %}
+                                                            {% endwith %}
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td class="product-price" data-title="Price">
+                                                <span class="woocommerce-Price-amount amount">{{i.date_paid}}</span>
+                                            </td>
+
+                                            <td class="product-price" data-title="Price">
+                                                <span class="woocommerce-Price-amount amount">{{i.payment_method}}</span>
+                                            </td>
+    
+                                            <td class="product-price" data-title="Price">
+                                                <a href="{% url 'commerce:order_detail' pk=i.pk %}">
+                                                    <span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>{{i.subtotal}}</span>
+                                                </a>             
+                                            </td>
+                                        </tr>
+    
+                                        {% endfor %}
+                                        {% endif %}
+    
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- .entry-content -->
+                </div>
+            </main>
+        </div>
+    </div>
+</div>
+            
+
+
+{% endblock %}
