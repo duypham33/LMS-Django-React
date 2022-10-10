@@ -130,7 +130,7 @@ def add_student(request):
             f'The account with email \'{email}\' already exists! Please, try to create a new one!')
         except:
             if password == confirm_password:
-                u = User.objects.create(first_name=first_name, last_name=last_name,username=username,
+                u = User.objects.create(first_name=first_name, last_name=last_name, username=username,
                 email=email, password=password, user_type='3')
 
                 stud = u.student

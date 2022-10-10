@@ -28,14 +28,8 @@ def login_user(request):
                 request.POST.get('account', None), request.POST.get('password', None))
         if user:
             login(request, user)
-
-            user_type = user.user_type
-            if user_type == '1':
-                return redirect('teacher:teaHome')
-            elif user_type == '2':
-                return redirect('staff:staHome')
-            else:
-                return redirect('student:stuHome')
+            return redirect('app:index')
+            
         else:
             messages.warning(request, 'Your username, email, or password is incorrect!')
 

@@ -7,7 +7,7 @@ from app.models import User, Course
 
 
 @receiver(post_save, sender = LatestCourseView)
-def send_notice_new_module(sender, instance, created, **kwargs):
+def stack_latest_views(sender, instance, created, **kwargs):
     if created:
         user = instance.user
         course = instance.course
