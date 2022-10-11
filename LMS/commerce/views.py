@@ -121,7 +121,7 @@ def single_checkout(request, pk):
 
 @login_required(login_url='login/')
 def checkout_process(request):
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.user_type == '3':
         cart = request.user.cart
 
         first_name = request.POST.get('billing_first_name')
@@ -158,8 +158,9 @@ def checkout_process(request):
             cart.save()
             item.delete()
 
-            if request.user.user_type != '1':
-                request.user.get_role().enroll(course)  #Now, can access the course
+            stu = request.user.student
+            stu.enroll(course)  #Now, can access the course
+            course.instructor.addStudent(stu)
 
         context = {'order': order, 'mode_order_completed': True}
         return render(request, 'commerce/completed_order.html', context = context)
