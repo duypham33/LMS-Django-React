@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     "staff.apps.StaffConfig",
     "course.apps.CourseConfig",
     "commerce.apps.CommerceConfig",
+    "chatapp.apps.ChatappConfig",
 ]
 
 MIDDLEWARE = [
@@ -77,6 +79,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "LMS.wsgi.application"
+ASGI_APPLICATION = "chatapp.routing.application"
 
 
 # Database
