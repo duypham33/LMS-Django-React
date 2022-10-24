@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "course.apps.CourseConfig",
     "commerce.apps.CommerceConfig",
     "chatapp.apps.ChatappConfig",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
