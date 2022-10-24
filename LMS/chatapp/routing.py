@@ -1,7 +1,7 @@
 
-from email.mime import application
-from channels.routing import ProtocolTypeRouter
+from django.urls import re_path
+from . import consumers
 
-application = ProtocolTypeRouter({
-    
-})
+websocket_urlpatterns = [
+    re_path(r"ws/chat/(?P<room_name>\w+)/$", consumers.ChatConsumer.as_asgi()),
+]
