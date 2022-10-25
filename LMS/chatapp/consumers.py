@@ -2,30 +2,30 @@ from app.models import User
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
-from .models import Message
+#from .models import Message
 
 
 class ChatConsumer(WebsocketConsumer):
 
-    def fetch_messages(self, data):
-        messages = Message.last_10_messages()
-        content = {
-            'command': 'messages',
-            'messages': self.messages_to_json(messages)
-        }
-        self.send_message(content)
+    # def fetch_messages(self, data):
+    #     messages = Message.last_10_messages()
+    #     content = {
+    #         'command': 'messages',
+    #         'messages': self.messages_to_json(messages)
+    #     }
+    #     self.send_message(content)
 
-    def new_message(self, data):
-        author = data['from']
-        author_user = User.objects.filter(username=author)[0]
-        message = Message.objects.create(
-            author=author_user, 
-            content=data['message'])
-        content = {
-            'command': 'new_message',
-            'message': self.message_to_json(message)
-        }
-        return self.send_chat_message(content)
+    # def new_message(self, data):
+    #     author = data['from']
+    #     author_user = User.objects.filter(username=author)[0]
+    #     message = Message.objects.create(
+    #         author=author_user, 
+    #         content=data['message'])
+    #     content = {
+    #         'command': 'new_message',
+    #         'message': self.message_to_json(message)
+    #     }
+    #     return self.send_chat_message(content)
 
     def messages_to_json(self, messages):
         result = []
@@ -41,10 +41,10 @@ class ChatConsumer(WebsocketConsumer):
             'timestamp': str(message.timestamp)
         }
 
-    commands = {
-        'fetch_messages': fetch_messages,
-        'new_message': new_message
-    }
+    # commands = {
+    #     'fetch_messages': fetch_messages,
+    #     'new_message': new_message
+    # }
 
     def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
@@ -63,6 +63,7 @@ class ChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
+        print(data)
         self.commands[data['command']](self, data)
         
 

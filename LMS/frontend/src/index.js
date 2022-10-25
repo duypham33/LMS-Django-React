@@ -1,20 +1,12 @@
+
 import React from 'react';
-import ReactDOM from 'react-dom';
-import Chat from './components/Chat';
-import WebSocketInstance from './websocket';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 
 
-class App extends React.Component {
-    componentDidMount() {
-        WebSocketInstance.connect();
-    }
-
-    render(){
-        return (
-            <Chat/>
-        )
-    }
-}
-
-ReactDOM.render(<App/>, document.getElementById('chatapp'));
-export default App;
+const root = ReactDOM.createRoot(document.getElementById('chatapp'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
