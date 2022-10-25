@@ -11,7 +11,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
-import chatapp.routing
+import chatapi.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LMS.settings")
 
@@ -19,6 +19,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "LMS.settings")
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
-        "websocket": URLRouter(chatapp.routing.websocket_urlpatterns)
+        "websocket": URLRouter(chatapi.routing.websocket_urlpatterns)
     }
 )

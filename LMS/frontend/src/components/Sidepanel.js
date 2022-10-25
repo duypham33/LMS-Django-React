@@ -1,14 +1,20 @@
 
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
+import { chatsContext, userContext } from './Messenger';
+import Contact from './Contact'
 
 export default function Sidepanel(props) {
+    const user = useContext(userContext)
+    const chats = useContext(chatsContext)
+    
 
     return (
         <div id="sidepanel">
             <div id="profile">
                 <div className="wrap">
-                    <img id="profile-img" src="http://emilcarlsson.se/assets/mikeross.png" className="online" alt="" />
-                    <p>Mike Ross</p>
+                    <img id="profile-img" src={window.location.origin + "/" + user.avatar} 
+                    className="online" alt="" />
+                    <p>{user.name}</p>
                     <i className="fa fa-chevron-down expand-button" aria-hidden="true"></i>
                     <div id="status-options">
                         <ul>
@@ -34,26 +40,7 @@ export default function Sidepanel(props) {
             </div>
             <div id="contacts">
                 <ul>
-                    <li className="contact">
-                        <div className="wrap">
-                            <span className="contact-status online"></span>
-                            <img src="http://emilcarlsson.se/assets/louislitt.png" alt="" />
-                            <div className="meta">
-                                <p className="name">Louis Litt</p>
-                                <p className="preview">You just got LITT up, Mike.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li className="contact active">
-                        <div className="wrap">
-                            <span className="contact-status busy"></span>
-                            <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-                            <div className="meta">
-                                <p className="name">Harvey Specter</p>
-                                <p className="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and htmlForty six other things.</p>
-                            </div>
-                        </div>
-                    </li>
+                    {chats.map(u => <Contact chat = {u} />)}
                 </ul>
             </div>
             <div id="bottom-bar">

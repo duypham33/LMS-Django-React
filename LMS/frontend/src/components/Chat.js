@@ -1,104 +1,109 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import WebSocketInstance from '../websocket';
+import { useParams } from "react-router-dom";
 
+export default function Chat(props) {
+    const {chatID} = useParams();
+    const [messages, setMessages] = useState({message: ""})
 
-class Chat extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {}
-    
-        this.waitForSocketConnection(() => {
-          WebSocketInstance.addCallbacks(this.setMessages.bind(this), this.addMessage.bind(this))
-          WebSocketInstance.fetchMessages(this.props.currentUser);
-        });
+    const addMessage = (new_message) => {
+        setMessages({ messages: [...messages, new_message]});
     }
     
-    waitForSocketConnection(callback) {
-        const component = this;
-        setTimeout(
-            function () {
-            if (WebSocketInstance.state() === 1) {
-                console.log("Connection is made")
+    const set_messages = (messages) => {
+        setMessages({ messages: messages.reverse()});
+    }
+
+    const waitForSocketConnection = (callback)=>{
+        setTimeout(function(){
+            if (WebSocketInstance.state() === 1){
+                console.log("Connection is made");
                 callback();
                 return;
-            } else {
-                console.log("wait for connection...")
-                component.waitForSocketConnection(callback);
             }
-        }, 100);
+            else{
+                console.log("wait for connection...");
+                waitForSocketConnection(callback);
+            }
+        }, 100)
     }
+
+
+    useEffect(() => {
+        console.log(chatID)
+        waitForSocketConnection(()=>{
+            WebSocketInstance.addCallbacks(
+                set_messages, addMessage
+            )
+        });
+
+        WebSocketInstance.connect(chatID);
+    })
     
-    addMessage(message) {
-        this.setState({ messages: [...this.state.messages, message]});
-    }
     
-    setMessages(messages) {
-        this.setState({ messages: messages.reverse()});
-    }
-    
-    messageChangeHandler = (event) =>  {
-        this.setState({
+    const messageChangeHandler = (event) =>  {
+        setMessages({
             message: event.target.value
         })
     }
     
-    sendMessageHandler = (e) => {
+    const sendMessageHandler = (e) => {
         e.preventDefault();
         const messageObject = {
             from: "admin",
-            content: this.state.message,
+            content: messages,
         };
+
         WebSocketInstance.newChatMessage(messageObject);
-        this.setState({
+        setMessages({
             message: ''
-        });
+        })
     }
     
-    renderMessages = (messages) => {
-        const currentUser = "admin";
-        return messages.map((message, i) => (
-            <li 
-                key={message.id} 
-                className={message.author === currentUser ? 'sent' : 'replies'}>
-                <img src="http://emilcarlsson.se/assets/mikeross.png" />
-                <p> {message.content} <br/> </p>
-            </li>
-        ));
-    }
+    // const renderMessages = (messages) => {
+    //     const currentUser = "admin";
+    //     return messages.map((message, i) => (
+    //         // <li 
+    //         //     key={message.id} 
+    //         //     className={message.author === currentUser ? 'sent' : 'replies'}>
+    //         //     <img src="http://emilcarlsson.se/assets/mikeross.png" />
+    //         //     <p> {message.content} <br/> </p>
+    //         // </li>
+    //         Hello
+    //     ));
+    // };
 
-    render() {
-        const messages = this.state.messages;
-        return (
-            <>
-                <div className="messages">
-                    <ul id="chat-log">
-                    { 
-                        messages && 
-                        this.renderMessages(messages) 
-                    }
-                    </ul>
-                </div>
-                <div className="message-input">
-                    <form onSubmit={this.sendMessageHandler}>
-                        <div className="wrap">
-                            <input 
-                                onChange={this.messageChangeHandler}
-                                value={this.state.message}
-                                required 
-                                id="chat-message-input" 
-                                type="text" 
-                                placeholder="Write your message..." />
-                            <i className="fa fa-paperclip attachment" aria-hidden="true"></i>
-                            <button id="chat-message-submit" className="submit">
-                                <i className="fa fa-paper-plane" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </>
-        );
-    };
+    
+    const msgs = messages;
+    return (
+        <>
+            <div className="messages">
+                <ul id="chat-log">
+                { 
+                    // msgs && 
+                    // renderMessages(msgs) 
+                }
+                </ul>
+            </div>
+            <div className="message-input">
+                <form onSubmit={sendMessageHandler}>
+                    <div className="wrap">
+                        <input 
+                            onChange={messageChangeHandler}
+                            required 
+                            id="chat-message-input" 
+                            type="text" 
+                            placeholder="Write your message..." />
+                        <i className="fa fa-paperclip attachment" aria-hidden="true"></i>
+                        <button id="chat-message-submit" className="submit">
+                            <i className="fa fa-paper-plane" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </>
+    );
+
 }
 
-export default Chat;

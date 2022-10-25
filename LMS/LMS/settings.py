@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "staff.apps.StaffConfig",
     "course.apps.CourseConfig",
     "commerce.apps.CommerceConfig",
-    "chatapp.apps.ChatappConfig",
+    "chatapi.apps.ChatapiConfig",
     "frontend.apps.FrontendConfig",
     "rest_framework",
 ]

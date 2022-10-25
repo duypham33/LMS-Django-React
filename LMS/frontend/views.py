@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def index(request):
     path = os.path.join(settings.BASE_DIR, 'frontend/templates/frontend/index.html')
-    return render(request, path)
+    return render(request, path, {'userID': request.user.pk})
 
 
 @login_required
