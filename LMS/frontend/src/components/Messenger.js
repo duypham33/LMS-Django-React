@@ -1,7 +1,6 @@
 
 import React, { useContext, createContext, useState, useEffect } from "react";
 import { Outlet, useNavigate } from 'react-router-dom'
-//import { userContext } from "../App";
 import Sidepanel from './Sidepanel'
 import WebSocketInstance from '../websocket';
 import Cookies from "js-cookie";
@@ -16,8 +15,13 @@ export default function Messenger(props) {
     const nav = useNavigate();
     const [info, setInfo] = useState({});
 
+    console.log('I rerendered!', chats);
     useEffect(()=>{
-        let chatid = window.location.pathname.split("/")[2]
+
+        WebSocketInstance.addCallbacks("notice", updateChats);
+        console.log('I called!')
+
+        let chatid = window.location.pathname.split("/")[2];
         
         if (chatid !== ''){
             console.log('I get info!');
@@ -49,7 +53,7 @@ export default function Messenger(props) {
         else
             setInfo({represent: user.name, img_path: user.avatar});
 
-        if(chats.length === 0) {
+        if(chats.length === 0 || chats.length === 1) {
             console.log('I fetched!');
             fetch('/chatapi/chats/').then(res=>res.json()).then(data=>{
                 setUser({
@@ -65,7 +69,46 @@ export default function Messenger(props) {
                 setOrderChg(true);
             })
         }
-    }, [location.pathname]);
+    }, [location.pathname, chats.length]);
+
+
+
+    const updateChats = (parsedData) => {
+        console.log(chats);
+        let chatID = parsedData.chat.chatid;
+        let author = parsedData.author;
+        let ch = parsedData.chat;
+        let cs = chats;
+        let index = cs.indexOf(cs.filter(c => c.chatid == chatID)[0]);
+        console.log(index);
+        let c = {};
+
+        try {
+            c = cs[index];
+            cs.splice(index, 1);
+            c.lastest_msg = ch.lastest_msg;
+        }
+        catch {
+            c = ch;
+
+            if (author.id == user.id){
+                let others = parsedData.others;
+                if (others.is_group_chat === false){
+                    c.represent = others.friend_name;
+                    c.img_path = others.friend_avatar;
+                }
+            }
+        }
+        
+        cs.unshift(c);
+
+        setChats(cs);
+        setOrderChg(true);
+        console.log(chats);
+    }
+
+
+
 
     return (
         <userContext.Provider value={user}>
@@ -84,7 +127,7 @@ export default function Messenger(props) {
                             </div>
                         </div>
                         
-                        <Outlet/>
+                        <Outlet />
                     </div>
                 </div>
             </chatsContext.Provider>

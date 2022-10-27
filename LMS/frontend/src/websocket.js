@@ -13,15 +13,14 @@ class WebSocketService {
         this.socketRef = null;
     }
   
-    connect(chatID) {
-        const path = `ws://${window.location.host}/ws/chat/${chatID}/`;
+    connect(type, id) {
+        const path = (type === 'chat') ? `ws://${window.location.host}/ws/chat/${id}/`
+                                       : `ws://${window.location.host}/ws/notice/${id}/`;
         this.socketRef = new WebSocket(path);
         this.socketRef.onopen = () => {
             console.log('WebSocket open');
         };
-        // this.socketNewMessage(JSON.stringify({
-        //     command: 'fetch_messages'
-        // }));
+        
         this.socketRef.onmessage = e => {
             this.socketNewMessage(e.data);
         };
@@ -31,7 +30,7 @@ class WebSocketService {
         this.socketRef.onclose = () => {
             //console.log(ev);
             console.log("WebSocket closed let's reopen");
-            this.connect();
+            this.connect(type, id);
         };
     }
   
@@ -42,16 +41,17 @@ class WebSocketService {
         if (Object.keys(this.callbacks).length === 0) {
             return;
         }
-        if (command === 'messages') {
+
+        if (command === 'messages' || command === 'notices') {
             this.callbacks[command](parsedData);
         }
-        // if (command === 'new_message') {
-        //     this.callbacks[command](parsedData.message);
-        // }
     }
 
-    addCallbacks(messagesCallback) {
-        this.callbacks['messages'] = messagesCallback;
+    addCallbacks(type, funcCallback) {
+        if (type === 'chat')
+            this.callbacks['messages'] = funcCallback;
+        else
+            this.callbacks['notices'] = funcCallback;
         //this.callbacks['new_message'] = newMessageCallback;
     }
   

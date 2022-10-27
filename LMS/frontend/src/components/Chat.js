@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import WebSocketInstance from '../websocket';
 import { useParams } from "react-router-dom";
 import { chatsContext, userContext } from './Messenger';
+import { socketContext } from "../App";
 import SendMsg from './SendMsg';
 
 export default function Chat(props) {
@@ -10,71 +11,29 @@ export default function Chat(props) {
     const [messages, setMessages] = useState(null);
     const user = useContext(userContext);
     const [chats, setChats, chatsOrderChg, setOrderChg] = useContext(chatsContext);
+    const waitForSocketConnection = useContext(socketContext);
     //let messagesEnd;
     
     const newNessages = (parsedData) => {
         if (parsedData.chatID === chatID){
-            if (!parsedData.action)
-                updateChats(parsedData);
+            // if (!parsedData.action)
+            //     updateChats(parsedData);
             
             setMessages(parsedData.messages.reverse());
         }
 
-        else
-            updateChats(parsedData);
-    }
-
-    const updateChats = (parsedData)=>{
-        let cs = chats;
-        let index = chats.indexOf(chats.filter((c)=>c.chatid == parsedData.chatID)[0]);
-        let c = {};
-        let lm = parsedData.messages[0];
-        console.log(parsedData)
-        try{
-            c = cs[index];
-            cs.splice(index, 1);
-            c.lastest_msg = lm.content
-        }
-        catch{
-            c = {
-                chatid: parsedData.chatID,
-                represent: lm.author.name,  //Since this case is sent by the other
-                img_path: lm.author.avatar,
-                lastest_msg: lm.content
-            }
-        }
-        
-        cs.unshift(c);
-
-        setChats(cs);
-        setOrderChg(true);
-    }
-
-    const waitForSocketConnection = (callback)=>{
-        setTimeout(function(){
-            if (WebSocketInstance.state() === 1){
-                console.log("Connection is made");
-                callback();
-                return;
-            }
-            else{
-                console.log("wait for connection...");
-
-                WebSocketInstance.connect(chatID);
-                waitForSocketConnection(callback);
-            }
-        }, 100)
+        // else
+        //     updateChats(parsedData);
     }
 
 
     useEffect(() => {
-        if(chatID.includes('0_') === false){
+        if(chatID.includes('0_') === false) {
+            WebSocketInstance.connect("chat", chatID);
             waitForSocketConnection(()=>{
-                WebSocketInstance.addCallbacks(newNessages);
+                WebSocketInstance.addCallbacks("chat", newNessages);
                 WebSocketInstance.fetchMessages(chatID);
             });
-    
-            WebSocketInstance.connect(chatID);
         }
 
         else

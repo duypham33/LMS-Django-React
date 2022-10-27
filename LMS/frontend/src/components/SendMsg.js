@@ -2,14 +2,12 @@ import React, { useState, useContext } from "react";
 import WebSocketInstance from '../websocket';
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import { chatsContext } from "./Messenger";
 
 
 export default function SendMsg(props){
 
     const [newSend, setNewSend] = useState({message: ''});
     const nav = useNavigate();
-    const [chats, setChats, chatsOrderChg, setOrderChg] = useContext(chatsContext);
     
     const messageChangeHandler = (event) =>  {
         setNewSend({
@@ -28,7 +26,6 @@ export default function SendMsg(props){
 
         if(props.chatID.includes('0_') === false){
             WebSocketInstance.newChatMessage(messageObject);
-            //updateChats(newSend.message);
         }
             
         else{
@@ -50,7 +47,6 @@ export default function SendMsg(props){
                 nav("/chat/");
                 
             }).then(data=>{
-                addNewChat(data.new_chat);
                 nav(`/chat/${data.new_chat.chatid}/`);
             })
         }
@@ -60,24 +56,7 @@ export default function SendMsg(props){
         })
     }
 
-    const updateChats = (newMsg)=>{
-        let index = chats.indexOf(chats.filter((c)=>c.chatid == props.chatID)[0]);
-        let cs = chats;
-        let c = cs[index];
-        cs.splice(index, 1);
-        c.lastest_msg = newMsg;
-        cs.unshift(c);
-
-        setChats(cs);
-        setOrderChg(true);
-    }
-
-    const addNewChat = (newChat) => {
-        let cs = chats;
-        cs.unshift(newChat);
-        setChats(cs);
-        setOrderChg(true);
-    }
+    
 
     return (
         

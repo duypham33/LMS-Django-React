@@ -13,13 +13,7 @@ class ChatSerializer(serializers.ModelSerializer):
         model = Chat
         fields = ['chatid', 'represent', 'img_path', 'lastest_msg']
 
-    # def get_chatid(self, obj):
-    #     if "friendid" in self.context:
-    #         userid = self.context.get("userid")
-    #         friendid = self.context.get("friendid")
-    #         if Chat.objects.filter(Q(participants__pk = userid) & Q(participants__pk = friendid)).first():
-    #             return 
-
+   
     def get_represent(self, obj):
         if obj.participants: 
             if obj.participants.count() > 2:
@@ -43,11 +37,6 @@ class ChatSerializer(serializers.ModelSerializer):
             return msg.content
         return ''
 
-
-    # def create(self, validate_data):
-    #     userid = validate_data.pop("userid", None)
-    #     self.userid = userid
-    #     return super().create(validate_data)
 
 
 class ContactSerializer(serializers.ModelSerializer):

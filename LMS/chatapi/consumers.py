@@ -104,3 +104,25 @@ class ChatConsumer(WebsocketConsumer):
 
     # def fetch_messages(self, event):
     #     self.send(text_data=json.dumps(event['messages']))
+
+
+
+class NoticeConsumer(WebsocketConsumer):
+    def connect(self):
+        self.room_name = self.scope['url_route']['kwargs']['userID']
+        self.room_group_name = 'notice_%s' % self.room_name
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name
+        )
+        self.accept()
+
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    def send_notice(self, event):
+        message = event['message']
+        self.send(text_data=json.dumps(message))

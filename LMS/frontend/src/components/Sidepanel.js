@@ -4,15 +4,19 @@ import { chatsContext, userContext } from './Messenger';
 import Contact from './Contact';
 import Cookies from 'js-cookie';
 
+
 export default function Sidepanel(props) {
-    const user = useContext(userContext)
-    const [chats, setChats, chatsOrderChg, setOrderChg] = useContext(chatsContext)
+    const user = useContext(userContext);
+    const [chats, setChats, chatsOrderChg, setOrderChg] = useContext(chatsContext);
+
     const [kw, setKW] = useState('');
     const [contacts, setContacts] = useState([]);
 
     let chatid = window.location.pathname.split("/")[2];
     
     useEffect(()=>{
+        console.log(chats)
+        console.log(contacts)
         console.log('This me!')
         if (kw === '') {
             console.log('Contacts to chats?')
@@ -41,7 +45,7 @@ export default function Sidepanel(props) {
 
             setOrderChg(false);
         }
-    }, [chats, chatsOrderChg, kw, chatid])
+    }, [chatsOrderChg, kw, chatid])
 
     const searchHandler = (event) => {
         setKW(event.target.value);
