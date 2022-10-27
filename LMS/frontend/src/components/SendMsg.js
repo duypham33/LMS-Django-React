@@ -81,7 +81,7 @@ export default function SendMsg(props){
 
     return (
         
-        <div className="message-input">
+        <div className="message-input" style={{marginTop: "300px"}}>
             <form onSubmit={sendMessageHandler}>
                 <div className="wrap">
                     <input 

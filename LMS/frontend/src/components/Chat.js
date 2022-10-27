@@ -10,6 +10,7 @@ export default function Chat(props) {
     const [messages, setMessages] = useState(null);
     const user = useContext(userContext);
     const [chats, setChats, chatsOrderChg, setOrderChg] = useContext(chatsContext);
+    //let messagesEnd;
     
     const newNessages = (parsedData) => {
         if (parsedData.chatID === chatID){
@@ -78,6 +79,8 @@ export default function Chat(props) {
 
         else
             setMessages([]);
+
+        //scrollToBottom();
     }, [chatID])
 
 
@@ -109,9 +112,10 @@ export default function Chat(props) {
     
     const renderMessages = (msgs) => {
 
-        return msgs.map((msg, i) => (
+        return msgs.map((msg, i, arr) => (
             <li 
                 key={msg.id} 
+                style={{ marginBottom: arr.length - 1 === i ? "300px" : "15px" }}
                 className={msg.author.name === user.name ? 'sent' : 'replies'}>
                 <img src={window.location.origin + "/" + msg.author.avatar} />
                 <p> {msg.content} <br/> 
@@ -121,18 +125,26 @@ export default function Chat(props) {
         ));
     };
 
+    // const scrollToBottom = () => {
+    //     messagesEnd.scrollIntoView({ behavior: "smooth" });
+    //   };
+
     
     return (
         <>
-            <div className="messages">
+            <div className="messages" style={{marginBottom: "300px"}}>
                 <ul id="chat-log">
-                { 
-                    messages && 
-                    renderMessages(messages) 
-                }
+                    { 
+                        messages && 
+                        renderMessages(messages) 
+                    }
+                    {/* <div>
+                        style={{ float: "left", clear: "both" }}
+                        ref = {el => {messagesEnd = el}}
+                    </div> */}
                 </ul>
             </div>
-
+            <br/><br/><br/><br/>
             <SendMsg userID={user.id} chatID={chatID}/>
         </>
     );
