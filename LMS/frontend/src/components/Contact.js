@@ -3,11 +3,19 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 export default function Contact(props) {
-
-
+    
+    // let loct = {
+    //     pathname: `${props.chat.chatid}`,
+    //     state: {
+    //         name: props.chat.represent,
+    //         img_path: props.chat.img_path
+    //     }
+    // }
+    
     return (
-        <NavLink to={`${props.chat.chatid}`} style={{ color: "#fff" }}>
-            <li className="contact">
+        <NavLink to={`${props.chat.chatid}`}
+        style={{ color: "#fff" }}>
+            <li className={`contact ${props.active}`}>
                 <div className="wrap">
                     <span className="contact-status online"></span>
                     <img src={window.location.origin + '/' + props.chat.img_path} height="52px" alt="" 
@@ -22,15 +30,5 @@ export default function Contact(props) {
                 </div>
             </li>
         </NavLink>
-        // <li className="contact active">
-        //     <div className="wrap">
-        //         <span className="contact-status busy"></span>
-        //         <img src="http://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-        //         <div className="meta">
-        //             <p className="name">Harvey Specter</p>
-        //             <p className="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and htmlForty six other things.</p>
-        //         </div>
-        //     </div>
-        // </li>
     )
 }

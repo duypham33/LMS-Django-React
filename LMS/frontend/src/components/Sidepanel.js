@@ -1,19 +1,67 @@
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { chatsContext, userContext } from './Messenger';
-import Contact from './Contact'
+import Contact from './Contact';
+import Cookies from 'js-cookie';
 
 export default function Sidepanel(props) {
     const user = useContext(userContext)
-    const chats = useContext(chatsContext)
+    const [chats, setChats, chatsOrderChg, setOrderChg] = useContext(chatsContext)
+    const [kw, setKW] = useState('');
+    const [contacts, setContacts] = useState([]);
+
+    let chatid = window.location.pathname.split("/")[2];
     
+    useEffect(()=>{
+        console.log('This me!')
+        if (kw === '') {
+            console.log('Contacts to chats?')
+            setContacts(chats);
+            setOrderChg(false);
+        }
+            
+        else {
+            console.log('Did I fetch?')
+            const requestContent = {
+                method: "POST",
+                withCredentials: true,
+                headers: {
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    command: "kw",
+                    kw: kw
+                })
+            }
+            
+            fetch('/chatapi/friends_search/', requestContent).then(res=>res.json()).then(data=>{
+                setContacts(data.contacts);
+            })
+
+            setOrderChg(false);
+        }
+    }, [chats, chatsOrderChg, kw, chatid])
+
+    const searchHandler = (event) => {
+        setKW(event.target.value);
+    }
+
+    const isActive = contact => {
+        try{
+            return contact.chatid == chatid ? "active" : "";
+        }
+        catch{
+            return '';
+        }
+    }
 
     return (
         <div id="sidepanel">
             <div id="profile">
                 <div className="wrap">
                     <img id="profile-img" src={window.location.origin + "/" + user.avatar} 
-                    className="online" alt="" />
+                    className="online" alt="" height="60px"/>
                     <p>{user.name}</p>
                     <i className="fa fa-chevron-down expand-button" aria-hidden="true"></i>
                     <div id="status-options">
@@ -36,11 +84,11 @@ export default function Sidepanel(props) {
             </div>
             <div id="search">
                 <label htmlFor=""><i className="fa fa-search" aria-hidden="true"></i></label>
-                <input type="text" placeholder="Search contacts..." />
+                <input type="text" placeholder="Search contacts..." value={kw} onChange={searchHandler}/>
             </div>
             <div id="contacts">
                 <ul>
-                    {chats.map(u => <Contact chat = {u} />)}
+                    {contacts.map(u => <Contact chat = {u} active = {isActive(u)} />)}
                 </ul>
             </div>
             <div id="bottom-bar">

@@ -1,10 +1,10 @@
 
 import React, { useContext, createContext, useState, useEffect } from "react";
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 //import { userContext } from "../App";
 import Sidepanel from './Sidepanel'
 import WebSocketInstance from '../websocket';
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 export const userContext = createContext()
 export const chatsContext = createContext()
@@ -12,45 +12,71 @@ export const chatsContext = createContext()
 export default function Messenger(props) {
     const [user, setUser] = useState({});
     const [chats, setChats] = useState([]);
-    
-    //console.log(window.location.pathname == '/chat/')
-    //console.log(window.location)
+    const [chatsOrderChg, setOrderChg] = useState(false); //Help re-render when object chats updated
+    const nav = useNavigate();
+    const [info, setInfo] = useState({});
 
     useEffect(()=>{
-        // const userID = JSON.parse(document.getElementById('userID').textContent);
-        // const requestContent = {
-        //     method: "POST",
-        //     withCredentials: true,
-        //     headers: {
-        //         'X-CSRFToken': Cookies.get('csrftoken'),
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //         userid: JSON.parse(document.getElementById('userID').textContent)
-        //     })
-        // }
-        //console.log("fetch", userID)
-        fetch('/chatapi/chats/').then(res=>res.json()).then(data=>{
-            setUser({
-                id: userID,
-                name: data.user_info.name,
-                avatar: data.user_info.avatar,
+        let chatid = window.location.pathname.split("/")[2]
+        
+        if (chatid !== ''){
+            console.log('I get info!');
+            let param = chatid.split("_")
+    
+            const requestContent = {
+                method: "POST",
+                withCredentials: true,
+                headers: {
+                    'X-CSRFToken': Cookies.get('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    command: "info",
+                    info_id: param.slice(-1)[0],
+                    isChatID: param.length === 1
+                })
+            }
+            
+            fetch('/chatapi/friends_search/', requestContent).then(res=>{
+                if (res.ok)
+                    return res.json();
+                nav("/chat/");
+                
+            }).then(data=>{
+                setInfo({represent: data.represent, img_path: data.img_path});
             })
+        }
+        else
+            setInfo({represent: user.name, img_path: user.avatar});
 
-            setChats(data.chats)
-        })
+        if(chats.length === 0) {
+            console.log('I fetched!');
+            fetch('/chatapi/chats/').then(res=>res.json()).then(data=>{
+                setUser({
+                    id: data.user_info.id,
+                    name: data.user_info.name,
+                    avatar: data.user_info.avatar,
+                })
 
-    }, [])
+                if (chatid === '')
+                    setInfo({represent: data.user_info.name, img_path: data.user_info.avatar});
+    
+                setChats(data.chats);
+                setOrderChg(true);
+            })
+        }
+    }, [location.pathname]);
 
     return (
         <userContext.Provider value={user}>
-            <chatsContext.Provider value={chats}>
+            <chatsContext.Provider value={[chats, setChats, chatsOrderChg, setOrderChg]}>
                 <div id="frame">
                     <Sidepanel />
                     <div className="content">
                         <div className="contact-profile">
-                            <img src={window.location.origin + "/" + user.avatar} alt="" />
-                            <p>{user.name}</p>
+                            <img src={window.location.origin + "/" + info.img_path} alt="" 
+                            height="60px"/>
+                            <p>{info.represent}</p>
                             <div className="social-media">
                                 <i className="fa fa-facebook" aria-hidden="true"></i>
                                 <i className="fa fa-twitter" aria-hidden="true"></i>

@@ -3,41 +3,53 @@ from app.models import User
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
-from .models import Message
-
+from .models import Message, Chat
+from datetime import datetime
 
 class ChatConsumer(WebsocketConsumer):
 
     def fetch_messages(self, data):
-        messages = Message.last_10_messages()
+        chat = Chat.objects.filter(pk = int(data["chat_id"])).first()
+
+        messages = chat.last_10_messages()
         content = {
             'command': 'messages',
+            'action': 'fetch_messages',
+            'chatID': data["chat_id"],
             'messages': self.messages_to_json(messages)
         }
-        self.send_message(content)
+        self.send_chat_messages(content)
 
     def new_message(self, data):
-        author = data['from']
-        author_user = User.objects.filter(username=author)[0]
-        message = Message.objects.create(
-            author=author_user, 
-            content=data['message'])
+        author_user = User.objects.filter(pk = int(data['userID'])).first()
+        chat_room = Chat.objects.filter(pk = int(data["chatID"])).first()
+    
+        Message.objects.create(author=author_user, chat_room=chat_room, content=data['content'])
+        chat_room.latestSent = datetime.now()
+        chat_room.save()
+
+        messages = chat_room.last_10_messages()
         content = {
-            'command': 'new_message',
-            'message': self.message_to_json(message)
+            'command': 'messages',
+            'chatID': data["chatID"],
+            'messages': self.messages_to_json(messages)
         }
-        return self.send_chat_message(content)
+        self.send_chat_messages(content)
+
 
     def messages_to_json(self, messages):
-        result = []
-        for message in messages:
-            result.append(self.message_to_json(message))
-        return result
+        return [self.message_to_json(msg) for msg in messages]
 
     def message_to_json(self, message):
+        author = message.author
+
         return {
-            'id': message.id,
-            'author': message.author.username,
+            'id': message.pk,
+            'author': {
+                'id': author.pk,
+                'name': author.get_name(),
+                'avatar': author.avatar.name
+            },
             'content': message.content,
             'timestamp': str(message.timestamp)
         }
@@ -68,18 +80,27 @@ class ChatConsumer(WebsocketConsumer):
         self.commands[data['command']](self, data)
         
 
-    def send_chat_message(self, message):    
+    def send_chat_messages(self, message):    
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name,
             {
-                'type': 'chat_message',
+                'type': 'chat_messages',
                 'message': message
             }
         )
 
-    def send_message(self, message):
-        self.send(text_data=json.dumps(message))
-
-    def chat_message(self, event):
+    def chat_messages(self, event):
         message = event['message']
         self.send(text_data=json.dumps(message))
+        
+    # def send_fetch_messages(self, messages):
+    #     async_to_sync(self.channel_layer.group_send)(
+    #         self.room_group_name,
+    #         {
+    #             'type': 'fetch_messages',
+    #             'messages': messages
+    #         }
+    #     )
+
+    # def fetch_messages(self, event):
+    #     self.send(text_data=json.dumps(event['messages']))

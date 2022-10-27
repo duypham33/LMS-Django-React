@@ -1,8 +1,8 @@
+
 import React, { useEffect, createContext, useState } from 'react';
 import ReactDOM from 'react-dom';
 import Messenger from './components/Messenger';
 import Chat from './components/Chat';
-import WebSocketInstance from './websocket';
 import {
     BrowserRouter as Router,
     Routes,
@@ -11,7 +11,6 @@ import {
     Redirect,
     BrowserRouter,
   } from "react-router-dom";
-import Cookies from 'js-cookie';
 
 
 // export const userContext = createContext()

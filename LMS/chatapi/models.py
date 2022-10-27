@@ -8,15 +8,16 @@ class Chat(models.Model):
     chatid = models.AutoField(primary_key = True)
     participants = models.ManyToManyField('app.User', related_name='chats')
     roomName = models.CharField(max_length = 100, null = True, blank = True)
+    latestSent = models.DateTimeField(null = True, blank = True)
 
     def __str__(self):
         return f"Chat-id {self.chatid}"
 
     def last_10_messages(self):
-        return self.messages.order_by('-pk').all()[:10]   #Same -timestamp
+        return self.messages.order_by('-pk').all()[:9]   #Same -timestamp
     
     class Meta:
-         ordering = ["-pk"]  
+         ordering = ["-latestSent"]  
 
 
 class Message(models.Model):
