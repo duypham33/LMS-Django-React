@@ -168,6 +168,7 @@ def checkout_process(request):
     return redirect('app:index')
 
 
+
 @login_required(login_url='login/')
 def view_orders(request):
     orders = request.user.orders if request.user.orders else None
