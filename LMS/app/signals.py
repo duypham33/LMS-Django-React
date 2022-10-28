@@ -19,6 +19,7 @@ def create_user_with_type(sender, instance, created, **kwargs):
     if created:
         password = instance.password
         instance.set_password(password)
+        instance.save()
 
         Cart.objects.create(user = instance)
 

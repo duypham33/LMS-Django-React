@@ -164,6 +164,8 @@ def checkout_process(request):
 
         context = {'order': order, 'mode_order_completed': True}
         return render(request, 'commerce/completed_order.html', context = context)
+    messages.warning(request, 'Only student account can enroll a course!')
+    return redirect('app:index')
 
 
 @login_required(login_url='login/')
