@@ -1,6 +1,6 @@
 # Learning-Management-System (Django-React)
 This app is a combination of Udemy and Canvas. There are three different types of users: Teachers, Staffs, and Students.
-* Django, signals, channels, redis, rest-framework, React, Websocket.
+* Django, signals, channels, redis, celery, rest-framework, React, Websocket.
 ---
 ## Teachers:
 * Can create courses, and sale their course on the website.
@@ -8,6 +8,7 @@ This app is a combination of Udemy and Canvas. There are three different types o
 * Can manage staffs and students.
 * Can create modules, pages, assignments, quizzes, exams, or send notifications to people in their courses.
 * Quizzes and Exams can be created and editted with lots of feature such as number of attempts, time limit, grade calculated by highest, latest, or average of attempts.
+* Quizzes and Assignments are closed by due date by Celery.
 * Each question can have different versions and showed randomly, and multiple choice answers are also showed randomly in different attempts. But all of the order and selected answers are returned if the attempt has been saved and not submited yet.
 * Multiple choice questions are auto-graded, and short answer questions are graded by staffs or teachers.
 * Final grade of the assignment is based on the rule assigned: Highest, Latest, or Average of attempts.
