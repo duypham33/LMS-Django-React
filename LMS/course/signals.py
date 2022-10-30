@@ -1,10 +1,13 @@
 
+import sched
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from app.models import Notification
 from course.models import Module, PostFileContent, Attempt, Quiz, SubAttempt, Assignment, AssignmentFile, Grade
 import os
 from decimal import Decimal
+from django_celery_beat.models import MINUTES, PeriodicTask, CrontabSchedule, PeriodicTasks
+import json
 
 
 @receiver(post_save, sender=Module)
@@ -67,6 +70,72 @@ def assignment_inform(sender, instance, created, **kwargs):
     notice.senToList([stu.user for stu in course.students.all()], showed_on_inbox=f'{_action} assignment in ')
     notice.senToList([sta.user for sta in course.staffs.all()], showed_on_inbox=f'{_action} assignment in ')
         
+
+
+# @receiver(post_save, sender=Quiz)
+# def close_quiz_schedule(sender, instance, created, **kwargs):
+#     if instance.closed == False:
+#         schd = False
+#         if created:
+#             schd = True
+#         else:
+#             update_fields = kwargs.pop('update_fields', None)
+#             if update_fields and 'due_date' in update_fields:
+#                 schd = True
+
+#         if schd == True:
+#             due_date = instance.due_date
+#             task = PeriodicTask.objects.filter(name = "close-quiz-"+str(instance.id)).first()
+#             if task:
+#                 schedule = task.crontab
+#                 schedule.hour = due_date.hour
+#                 schedule.minute = due_date.minute
+#                 schedule.day_of_month = due_date.day
+#                 schedule.month_of_year = due_date.month
+#                 schedule.save()
+
+#             else:
+#                 schedule, _created = CrontabSchedule.objects.get_or_create(hour = due_date.hour, 
+#                             minute = due_date.minute, day_of_month = due_date.day,
+#                             month_of_year = due_date.month)
+#                 task = PeriodicTask.objects.create(crontab=schedule, 
+#                             name="close-quiz-"+str(instance.id), 
+#                             task="course.celery_tasks.close_quiz", 
+#                             args=json.dumps((instance.id,)))
+
+
+
+# @receiver(post_save, sender=Assignment)
+# def close_assignment_schedule(sender, instance, created, **kwargs):
+#     if instance.closed == False:
+#         schd = False
+#         if created:
+#             schd = True
+#         else:
+#             update_fields = kwargs.pop('update_fields', None)
+#             if update_fields and 'due_date' in update_fields:
+#                 schd = True
+
+#         if schd == True:
+#             due_date = instance.due_date
+#             task = PeriodicTask.objects.filter(name = "close-assignment-"+str(instance.id)).first()
+#             if task:
+#                 schedule = task.crontab
+#                 schedule.hour = due_date.hour
+#                 schedule.minute = due_date.minute
+#                 schedule.day_of_month = due_date.day
+#                 schedule.month_of_year = due_date.month
+#                 schedule.save()
+
+#             else:
+#                 schedule, _created = CrontabSchedule.objects.get_or_create(hour = due_date.hour, 
+#                             minute = due_date.minute, day_of_month = due_date.day,
+#                             month_of_year = due_date.month)
+#                 task = PeriodicTask.objects.create(crontab=schedule, 
+#                             name="close-assignment-"+str(instance.id), 
+#                             task="course.celery_tasks.close_assignment", 
+#                             args=json.dumps((instance.id,)))
+
 
 
 @receiver(pre_delete, sender=AssignmentFile)
