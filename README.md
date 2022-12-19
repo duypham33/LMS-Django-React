@@ -1,6 +1,6 @@
 # Learning-Management-System (Django-React)
 This app is a combination of Udemy and Canvas. There are three different types of users: Teachers, Staffs, and Students.
-* Django, signals, channels, redis, celery, rest-framework, React, Websocket.
+* Django, signals, channels, redis, celery, rest-framework, React, Websocket, scikit-learn.
 ---
 ## Teachers:
 * Can create courses, and sale their course on the website.
@@ -28,3 +28,8 @@ This app is a combination of Udemy and Canvas. There are three different types o
 ---
 ## Chat app:
 Besides, users can chat with people among the courses. The realtime chat app is built by React & Websocket (frontend), and Django Rest Framework & Channels-Redis (backend).
+
+## Course Recommendation System with Udemy dataset:
+Content-based filtering with scikit-learn.
+
+---
