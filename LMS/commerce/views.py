@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from decimal import Decimal
 import uuid
+from .utils import readdata, getcleantitle, search, get_course_img
 # Create your views here.
 
 
@@ -19,16 +20,25 @@ def index(request):
     return render(request, 'commerce/index.html', context = context)
 
 
+#Course Recommendation System with Udemy dataset
+
+df = None
 @login_required(login_url='login/')
 def course_list(request):
+    if df == None:
+        df = readdata()
+        df = getcleantitle(df)
+    
     courses = Course.objects.filter(active = True).all()
     
     quer = request.GET.get('query')
-    if quer is not None and quer != '':
-        courses = Course.objects.filter(active = True).filter(Q(title__icontains = quer)|Q(subject__name__icontains = quer)).all()
-
+    courses = search(df = df, titlename = quer)
+    # if quer is not None and quer != '':
+    #     courses = Course.objects.filter(active = True).filter(Q(title__icontains = quer)|Q(subject__name__icontains = quer)).all()
+    courses = list(courses.map(lambda c: (c, (courses[c][0], get_course_img(courses[c][0]))), courses))
     context = {'courses': courses}
     return render(request, 'commerce/course_list.html', context = context)
+
 
 
 @login_required(login_url='login/')
